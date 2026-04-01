@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Ordens de Serviço</title>
+</head>
+<body>
+<h1>Ordens de Serviço Cadastradas</h1>
+
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Cliente</th>
+    <th>Status</th>
+    <th>Valor Total</th>
+    <th>Data de Abertura</th>
+    <th>PDF</th>
+    <th>E-mail</th>
+  </tr>
+  <tr th:each="ordem : ${ordens}">
+    <td th:text="${ordem.idOs}"></td>
+    <td th:text="${ordem.cliente.nome}"></td>
+    <td th:text="${ordem.status}"></td>
+    <td th:text="${ordem.valorTotal}"></td>
+    <td th:text="${ordem.dataAbertura}"></td>
+    <td>
+      <a th:href="@{/ordens/pdf/{id}(id=${ordem.idOs})}">Baixar PDF</a>
+    </td>
+    <td>
+      <a th:href="@{/ordens/email/{id}(id=${ordem.idOs})}">Enviar E-mail</a>
+    </td>
+  </tr>
+</table>
+
+<br>
+<a href="/ordens/nova">Nova Ordem de Serviço</a>
+</body>
+</html>
