@@ -97,9 +97,15 @@
         </div>
 
         <div class="linha">
-            <div class="campo">
-                <label>Status:</label>
-                <input type="text" th:field="*{status}">
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status" class="form-control" required>
+                    <option value="">Selecione</option>
+                    <option value="ABERTA">Aberta</option>
+                    <option value="EM_ANDAMENTO">Em andamento</option>
+                    <option value="FINALIZADA">Finalizada</option>
+                    <option value="CANCELADA">Cancelada</option>
+                </select>
             </div>
 
             <div class="campo">
