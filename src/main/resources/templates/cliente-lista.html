@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CLIENTES CADASTRADOS</title>
+
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script th:src="@{/js/sistema.js}" defer></script>
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu aberto">
+                    <a class="submenu-link active" th:href="@{/clientes}">CLIENTE</a>
+                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu">
+                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
+                    <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
+                </div>
+            </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <section class="content-card">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">CLIENTES CADASTRADOS</h1>
+                    <p class="page-subtitle" th:if="${origem == 'ordem'}">
+                        SELECIONE UM CLIENTE PARA VINCULAR À ORDEM DE SERVIÇO
+                    </p>
+                </div>
+
+                <a class="primary-button" th:href="@{/clientes/novo(origem=${origem})}">
+                    <i class="bi bi-plus-circle"></i>
+                    NOVO CLIENTE
+                </a>
+            </div>
+
+            <div th:if="${sucesso}" class="alerta alerta-sucesso" th:text="${sucesso}"></div>
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}"></span>
+            </div>
+
+            <form class="filtro-form" method="get" th:action="@{/clientes}">
+                <input type="hidden" name="origem" th:value="${origem}">
+
+                <div class="form-group">
+                    <label class="form-label" for="filtro">BUSCA</label>
+                    <input
+                            class="form-input"
+                            type="text"
+                            id="filtro"
+                            name="filtro"
+                            placeholder="BUSQUE POR NOME, CPF OU CIDADE"
+                            th:value="${filtroSelecionado}">
+                </div>
+
+                <div class="filtro-acoes">
+                    <button type="submit" class="primary-button">
+                        <i class="bi bi-search"></i>
+                        BUSCAR
+                    </button>
+
+                    <a th:href="@{/clientes(origem=${origem})}" class="secondary-button">
+                        <i class="bi bi-eraser"></i>
+                        LIMPAR
+                    </a>
+                </div>
+            </form>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>CPF</th>
+                        <th>TELEFONE</th>
+                        <th>E-MAIL</th>
+                        <th>ENDEREÇO</th>
+                        <th>AÇÕES</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="cliente : ${clientes}">
+                        <td th:text="${cliente.idCliente}"></td>
+                        <td th:text="${cliente.nome}"></td>
+                        <td th:text="${cliente.cpf != null and !#strings.isEmpty(cliente.cpf) ? T(br.com.ordempro.util.FormatadorUtils).formatarCpf(cliente.cpf) : 'NÃO INFORMADO'}"></td>
+                        <td th:text="${cliente.telefone != null and !#strings.isEmpty(cliente.telefone) ? T(br.com.ordempro.util.FormatadorUtils).formatarTelefone(cliente.telefone) : 'NÃO INFORMADO'}"></td>
+                        <td th:text="${cliente.email != null and !#strings.isEmpty(cliente.email) ? cliente.email : 'NÃO INFORMADO'}"></td>
+                        <td>
+                            <div>
+                                <span th:text="${cliente.endereco != null and !#strings.isEmpty(cliente.endereco) ? cliente.endereco : 'NÃO INFORMADO'}"></span>
+                                <br>
+                                <small th:text="${cliente.cidade != null ? cliente.cidade.nome : 'CIDADE NÃO INFORMADA'}"></small>
+                                <span th:if="${cliente.cep != null and !#strings.isEmpty(cliente.cep)}">
+                                    - <small th:text="${T(br.com.ordempro.util.FormatadorUtils).formatarCep(cliente.cep)}"></small>
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="acoes-tabela">
+                                <a th:if="${origem == 'ordem'}"
+                                   class="action-icon email-icon"
+                                   th:href="@{/ordens/nova(idCliente=${cliente.idCliente})}"
+                                   title="SELECIONAR CLIENTE">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </a>
+
+                                <a class="action-icon edit-icon"
+                                   th:href="@{/clientes/editar/{id}(id=${cliente.idCliente}, origem=${origem})}"
+                                   title="EDITAR">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <a th:if="${origem != 'ordem'}"
+                                   class="action-icon delete-icon"
+                                   th:href="@{/clientes/excluir/{id}(id=${cliente.idCliente})}"
+                                   onclick="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                   title="EXCLUIR">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(clientes)}">
+                        <td colspan="7" class="empty-message">
+                            NENHUM CLIENTE ENCONTRADO.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

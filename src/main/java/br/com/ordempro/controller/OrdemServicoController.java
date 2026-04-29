@@ -1,8 +1,5 @@
 package br.com.ordempro.controller;
 
-import br.com.ordempro.service.EmailService;
-import br.com.ordempro.service.PdfService;
-
 import br.com.ordempro.dto.OrdemServicoFormDTO;
 import br.com.ordempro.model.Cliente;
 import br.com.ordempro.model.ItemOrdemServico;
@@ -10,22 +7,23 @@ import br.com.ordempro.model.OrdemServico;
 import br.com.ordempro.model.Servico;
 import br.com.ordempro.model.Usuario;
 import br.com.ordempro.service.ClienteService;
+import br.com.ordempro.service.EmailService;
 import br.com.ordempro.service.ItemOrdemServicoService;
 import br.com.ordempro.service.OrdemServicoService;
+import br.com.ordempro.service.PdfService;
 import br.com.ordempro.service.ServicoService;
 import br.com.ordempro.service.UsuarioService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Controller
 public class OrdemServicoController {
@@ -38,13 +36,15 @@ public class OrdemServicoController {
     private final PdfService pdfService;
     private final EmailService emailService;
 
-    public OrdemServicoController(OrdemServicoService ordemServicoService,
-                                  ClienteService clienteService,
-                                  ServicoService servicoService,
-                                  ItemOrdemServicoService itemOrdemServicoService,
-                                  UsuarioService usuarioService,
-                                  PdfService pdfService,
-                                  EmailService emailService) {
+    public OrdemServicoController(
+            OrdemServicoService ordemServicoService,
+            ClienteService clienteService,
+            ServicoService servicoService,
+            ItemOrdemServicoService itemOrdemServicoService,
+            UsuarioService usuarioService,
+            PdfService pdfService,
+            EmailService emailService
+    ) {
         this.ordemServicoService = ordemServicoService;
         this.clienteService = clienteService;
         this.servicoService = servicoService;
@@ -55,76 +55,191 @@ public class OrdemServicoController {
     }
 
     @GetMapping("/ordens/nova")
-    public String novaOrdem(Model model) {
-        model.addAttribute("clientes", clienteService.listarTodos());
-        model.addAttribute("servicos", servicoService.listarTodos());
-        model.addAttribute("ordemForm", new OrdemServicoFormDTO());
-        return "ordem-servico";
+    public String exibirFormularioNovaOrdem(
+            @RequestParam(required = false) Long idCliente,
+            Model model
+    ) {
+        OrdemServicoFormDTO form = new OrdemServicoFormDTO();
+        form.setStatus("ABERTA");
+
+        if (idCliente != null) {
+            form.setIdCliente(idCliente);
+        }
+
+        model.addAttribute("ordemForm", form);
+        return carregarFormulario(model);
+    }
+
+    @GetMapping("/ordens/editar/{id}")
+    public String editarOrdem(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        OrdemServico ordemServico = ordemServicoService.buscarComClientePorId(id);
+
+        if (ordemServico == null) {
+            redirectAttributes.addFlashAttribute("erro", "Ordem de serviço não encontrada.");
+            return "redirect:/ordens";
+        }
+
+        ItemOrdemServico item = itemOrdemServicoService.buscarPrimeiroPorIdOrdem(id);
+
+        OrdemServicoFormDTO form = new OrdemServicoFormDTO();
+        form.setIdOs(ordemServico.getIdOs());
+        form.setIdCliente(ordemServico.getCliente() != null ? ordemServico.getCliente().getIdCliente() : null);
+        form.setDataAbertura(ordemServico.getDataAbertura());
+        form.setDataPrevistaConclusao(ordemServico.getDataPrevistaConclusao());
+        form.setStatus(ordemServico.getStatus());
+        form.setObservacao(ordemServico.getObservacao());
+        form.setValor(formatarValorParaFormulario(ordemServico.getValorTotal()));
+
+        if (item != null) {
+            form.setIdItem(item.getIdItem());
+            form.setIdServico(item.getServico() != null ? item.getServico().getIdServico() : null);
+            form.setDescricao(item.getDescricao());
+        }
+
+        model.addAttribute("ordemForm", form);
+        model.addAttribute("modoEdicao", true);
+        return carregarFormulario(model);
     }
 
     @PostMapping("/ordens/salvar")
-    public String salvarOrdem(@ModelAttribute("ordemForm") OrdemServicoFormDTO form, Model model) {
+    public String salvarOrdem(
+            @ModelAttribute("ordemForm") OrdemServicoFormDTO form,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (camposObrigatoriosInvalidos(form)) {
+            model.addAttribute("erro", "Preencha os campos obrigatórios: cliente e descrição.");
+            model.addAttribute("modoEdicao", form.getIdOs() != null);
+            return carregarFormulario(model);
+        }
 
         Cliente cliente = clienteService.buscarPorId(form.getIdCliente());
-        Servico servico = servicoService.buscarPorId(form.getIdServico());
-        Usuario usuario = usuarioService.buscarPorId(1L); // temporário para teste
+        Servico servico = form.getIdServico() != null ? servicoService.buscarPorId(form.getIdServico()) : null;
+        Usuario usuario = usuarioService.buscarPorId(1L);
 
-        OrdemServico ordemServico = new OrdemServico();
+        if (cliente == null || usuario == null) {
+            model.addAttribute("erro", "Cliente ou usuário inválido.");
+            model.addAttribute("modoEdicao", form.getIdOs() != null);
+            return carregarFormulario(model);
+        }
+
+        BigDecimal valor;
+
+        try {
+            valor = converterValor(form.getValor());
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erro", "Valor inválido. Digite no formato 0,00.");
+            model.addAttribute("modoEdicao", form.getIdOs() != null);
+            return carregarFormulario(model);
+        }
+
+        OrdemServico ordemServico = obterOuCriarOrdemServico(form);
         ordemServico.setCliente(cliente);
         ordemServico.setUsuario(usuario);
-        ordemServico.setDataAbertura(form.getDataAbertura() != null ? form.getDataAbertura() : LocalDateTime.now());
+        ordemServico.setDataAbertura(
+                form.getDataAbertura() != null ? form.getDataAbertura() : LocalDateTime.now()
+        );
         ordemServico.setDataPrevistaConclusao(form.getDataPrevistaConclusao());
         ordemServico.setStatus(form.getStatus());
         ordemServico.setObservacao(form.getObservacao());
-        ordemServico.setValorTotal(form.getValor() != null ? form.getValor() : BigDecimal.ZERO);
-        ordemServico.setEmailEnviado(false);
-        ordemServico.setDataEnvioEmail(null);
+        ordemServico.setValorTotal(valor);
+
+        if (ordemServico.getIdOs() == null) {
+            ordemServico.setEmailEnviado(false);
+            ordemServico.setDataEnvioEmail(null);
+        }
 
         ordemServico = ordemServicoService.salvar(ordemServico);
 
-        ItemOrdemServico item = new ItemOrdemServico();
+        ItemOrdemServico item = obterOuCriarItem(form, ordemServico);
         item.setOrdemServico(ordemServico);
         item.setServico(servico);
         item.setDescricao(form.getDescricao());
-        item.setValor(form.getValor());
-
+        item.setValor(valor);
         itemOrdemServicoService.salvar(item);
 
-        model.addAttribute("mensagem", "Ordem de serviço salva com sucesso!");
-        model.addAttribute("clientes", clienteService.listarTodos());
-        model.addAttribute("servicos", servicoService.listarTodos());
-        model.addAttribute("ordemForm", new OrdemServicoFormDTO());
-        return "ordem-servico";
+        if (form.getIdOs() == null) {
+            redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço cadastrada com sucesso.");
+        } else {
+            redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço atualizada com sucesso.");
+        }
+
+        return "redirect:/ordens";
     }
 
-        @GetMapping("/ordens")
-        public String listarOrdens(Model model){
-            model.addAttribute("ordens", ordemServicoService.listarTodas());
-            return "ordens-lista";
+    @GetMapping("/ordens/excluir/{id}")
+    public String excluirOrdem(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) {
+        OrdemServico ordemServico = ordemServicoService.buscarPorId(id);
+
+        if (ordemServico == null) {
+            redirectAttributes.addFlashAttribute("erro", "Ordem de serviço não encontrada.");
+            return "redirect:/ordens";
         }
+
+        itemOrdemServicoService.excluirPorIdOrdem(id);
+        ordemServicoService.excluirPorId(id);
+
+        redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço excluída com sucesso.");
+        return "redirect:/ordens";
+    }
+
+    @GetMapping("/ordens")
+    public String listarOrdens(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String cliente,
+            @RequestParam(required = false) String servico,
+            Model model
+    ) {
+        boolean semFiltros = isVazio(status) && isVazio(cliente) && isVazio(servico);
+
+        if (semFiltros) {
+            model.addAttribute("ordens", ordemServicoService.listarUltimas5());
+        } else {
+            model.addAttribute("ordens", ordemServicoService.buscarComFiltros(status, cliente, servico));
+        }
+
+        model.addAttribute("statusSelecionado", status);
+        model.addAttribute("clienteSelecionado", cliente);
+        model.addAttribute("servicoSelecionado", servico);
+        model.addAttribute("ordemService", ordemServicoService);
+
+        return "ordens-lista";
+    }
+
     @GetMapping("/ordens/pdf/{id}")
     public ResponseEntity<ByteArrayResource> gerarPdf(@PathVariable Long id) throws Exception {
-        OrdemServico ordemServico = ordemServicoService.buscarPorId(id);
+        OrdemServico ordemServico = ordemServicoService.buscarComClientePorId(id);
 
         if (ordemServico == null) {
             return ResponseEntity.notFound().build();
         }
 
         byte[] pdf = pdfService.gerarPdfOrdemServico(ordemServico);
-
-        ByteArrayResource resource = new ByteArrayResource(pdf);
+        ByteArrayResource recursoPdf = new ByteArrayResource(pdf);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ordem-servico-" + id + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .contentLength(pdf.length)
-                .body(resource);
+                .body(recursoPdf);
     }
+
     @GetMapping("/ordens/email/{id}")
-    public String enviarEmail(@PathVariable Long id) throws Exception {
-        OrdemServico ordemServico = ordemServicoService.buscarPorId(id);
+    public String enviarEmail(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes
+    ) throws Exception {
+        OrdemServico ordemServico = ordemServicoService.buscarComClientePorId(id);
 
         if (ordemServico == null) {
+            redirectAttributes.addFlashAttribute("erro", "Ordem de serviço não encontrada.");
             return "redirect:/ordens";
         }
 
@@ -137,16 +252,75 @@ public class OrdemServicoController {
         );
 
         ordemServico.setEmailEnviado(true);
-        ordemServico.setDataEnvioEmail(java.time.LocalDateTime.now());
+        ordemServico.setDataEnvioEmail(LocalDateTime.now());
         ordemServicoService.salvar(ordemServico);
 
+        redirectAttributes.addFlashAttribute("sucesso", "E-mail enviado com sucesso.");
         return "redirect:/ordens";
+    }
 
+    private boolean camposObrigatoriosInvalidos(OrdemServicoFormDTO form) {
+        return form.getIdCliente() == null ||
+                form.getDescricao() == null ||
+                form.getDescricao().isBlank();
+    }
+
+    private BigDecimal converterValor(String valorTexto) {
+        if (valorTexto == null || valorTexto.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+
+        String valorLimpo = valorTexto.trim()
+                .replace(".", "")
+                .replace(",", ".");
+
+        try {
+            return new BigDecimal(valorLimpo);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Valor inválido.");
+        }
+    }
+
+    private String formatarValorParaFormulario(BigDecimal valor) {
+        if (valor == null) {
+            return "";
+        }
+
+        return valor.toString().replace(".", ",");
+    }
+
+    private boolean isVazio(String valor) {
+        return valor == null || valor.isBlank();
+    }
+
+    private OrdemServico obterOuCriarOrdemServico(OrdemServicoFormDTO form) {
+        if (form.getIdOs() != null) {
+            OrdemServico existente = ordemServicoService.buscarPorId(form.getIdOs());
+            if (existente != null) {
+                return existente;
+            }
+        }
+
+        return new OrdemServico();
+    }
+
+    private ItemOrdemServico obterOuCriarItem(
+            OrdemServicoFormDTO form,
+            OrdemServico ordemServico
+    ) {
+        if (form.getIdItem() != null) {
+            ItemOrdemServico existente = itemOrdemServicoService.buscarPrimeiroPorIdOrdem(ordemServico.getIdOs());
+            if (existente != null) {
+                return existente;
+            }
+        }
+
+        return new ItemOrdemServico();
+    }
+
+    private String carregarFormulario(Model model) {
+        model.addAttribute("clientes", clienteService.listarTodos());
+        model.addAttribute("servicos", servicoService.listarTodos());
+        return "ordem-servico";
     }
 }
-
-
-
-
-
-

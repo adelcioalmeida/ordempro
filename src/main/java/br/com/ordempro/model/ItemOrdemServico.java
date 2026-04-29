@@ -1,5 +1,6 @@
 package br.com.ordempro.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,13 +25,16 @@ public class ItemOrdemServico {
     private Long idItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_os")
+    @JoinColumn(name = "id_os", nullable = false)
     private OrdemServico ordemServico;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_servico")
+    @JoinColumn(name = "id_servico", nullable = true)
     private Servico servico;
 
+    @Column(name = "descricao", length = 500)
     private String descricao;
+
+    @Column(name = "valor", nullable = false, precision = 10, scale = 2)
     private BigDecimal valor;
 }

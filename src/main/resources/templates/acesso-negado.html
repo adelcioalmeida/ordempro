@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ACESSO NEGADO</title>
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+</head>
+<body>
+
+<div class="layout">
+    <main class="main-content" style="margin-left: 0; width: 100%;">
+        <section class="content-card" style="max-width: 700px; margin: 60px auto; text-align: center;">
+            <h1 class="page-title">ACESSO NEGADO</h1>
+            <p class="page-subtitle">VOCÊ NÃO TEM PERMISSÃO PARA ACESSAR ESTA ÁREA DO SISTEMA.</p>
+
+            <div class="form-actions" style="justify-content: center; margin-top: 24px;">
+                <a th:href="@{/ordens}" class="primary-button">VOLTAR AO SISTEMA</a>
+                <a th:href="@{/login}" class="secondary-button">IR PARA O LOGIN</a>
+            </div>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

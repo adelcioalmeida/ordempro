@@ -3,40 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrdemPro - Login</title>
+    <title>LOGIN</title>
     <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
 
 <div class="login-container">
-    <div class="login-box">
-        <h1 class="login-title">Login</h1>
-        <img class="logo-imagem" src="/img/logo.png">
+    <div class="login-card">
+        <div class="login-logo">
+            <img src="/img/logo.png" alt="Logo OrdemPro">
+        </div>
 
-        <form th:action="@{/login}" method="post">
+        <h1>LOGIN</h1>
+
+        <form th:action="@{/login}" method="post" class="login-form">
             <div class="form-group">
-                <input
-                        class="form-input"
-                        type="text"
-                        name="username"
-                        placeholder="Usuário"
-                        required
-                >
+                <label for="username">E-MAIL</label>
+                <input type="text" id="username" name="username" placeholder="Digite seu e-mail" required>
             </div>
 
             <div class="form-group">
-                <input
-                        class="form-input"
-                        type="password"
-                        name="password"
-                        placeholder="Senha"
-                        required
-                >
+                <label for="password">SENHA</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
             </div>
 
-            <button class="login-button" type="submit">
-                Entrar
-            </button>
+            <div th:if="${param.error}" class="mensagem-erro">
+                E-MAIL OU SENHA INVÁLIDOS.
+            </div>
+
+            <div th:if="${param.logout}" class="mensagem-sucesso">
+                VOCÊ SAIU DO SISTEMA.
+            </div>
+
+            <button type="submit" class="login-button">ENTRAR</button>
         </form>
     </div>
 </div>

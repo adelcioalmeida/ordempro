@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class LoginController {
+public class AcessoController {
 
-    @GetMapping("/login")
-    public String exibirTelaLogin() {
-        return "login";
+    @GetMapping("/acesso-negado")
+    public String acessoNegado() {
+        return "acesso-negado";
     }
 }

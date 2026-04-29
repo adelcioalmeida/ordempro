@@ -1,38 +1,245 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Lista de Ordens de Serviço</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORDENS DE SERVIÇO</title>
+
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
-<h1>Ordens de Serviço Cadastradas</h1>
 
-<table border="1">
-  <tr>
-    <th>ID</th>
-    <th>Cliente</th>
-    <th>Status</th>
-    <th>Valor Total</th>
-    <th>Data de Abertura</th>
-    <th>PDF</th>
-    <th>E-mail</th>
-  </tr>
-  <tr th:each="ordem : ${ordens}">
-    <td th:text="${ordem.idOs}"></td>
-    <td th:text="${ordem.cliente.nome}"></td>
-    <td th:text="${ordem.status}"></td>
-    <td th:text="${ordem.valorTotal}"></td>
-    <td th:text="${ordem.dataAbertura}"></td>
-    <td>
-      <a th:href="@{/ordens/pdf/{id}(id=${ordem.idOs})}">Baixar PDF</a>
-    </td>
-    <td>
-      <a th:href="@{/ordens/email/{id}(id=${ordem.idOs})}">Enviar E-mail</a>
-    </td>
-  </tr>
-</table>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
+        </div>
 
-<br>
-<a href="/ordens/nova">Nova Ordem de Serviço</a>
+        <nav class="sidebar-menu">
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu">
+                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
+                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-ordens')">
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu aberto">
+                    <a class="submenu-link active" th:href="@{/ordens}">BUSCA</a>
+                    <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
+                </div>
+            </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <section class="content-card">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">ORDENS DE SERVIÇO</h1>
+                    <p class="page-subtitle">VISUALIZAÇÃO DAS ÚLTIMAS 5 ORDENS CADASTRADAS OU RESULTADO DOS FILTROS</p>
+                </div>
+
+                <a class="primary-button" th:href="@{/ordens/nova}">
+                    <i class="bi bi-plus-circle"></i>
+                    NOVA ORDEM
+                </a>
+            </div>
+
+            <div th:if="${sucesso}" class="alerta alerta-sucesso" th:text="${sucesso}"></div>
+            <div th:if="${erro}" class="alerta alerta-erro" th:text="${erro}"></div>
+
+            <div class="resumo-cards">
+                <div class="resumo-card">
+                    <span class="resumo-label">EXIBINDO</span>
+                    <strong class="resumo-valor" th:text="${#lists.size(ordens)}">0</strong>
+                    <span class="resumo-texto">REGISTROS NA TELA</span>
+                </div>
+
+                <div class="resumo-card">
+                    <span class="resumo-label">MODO</span>
+                    <strong class="resumo-valor"
+                            th:text="${(statusSelecionado == null or statusSelecionado == '')
+                                    and (clienteSelecionado == null or clienteSelecionado == '')
+                                    and (servicoSelecionado == null or servicoSelecionado == '')
+                                    ? 'ÚLTIMAS 5' : 'FILTRO'}">
+                        ÚLTIMAS 5
+                    </strong>
+                    <span class="resumo-texto">TIPO DE LISTAGEM</span>
+                </div>
+            </div>
+
+            <form method="get" th:action="@{/ordens}" class="filtro-form">
+                <div class="filtro-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="status">STATUS</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">TODOS</option>
+                            <option value="ABERTA" th:selected="${statusSelecionado == 'ABERTA'}">ABERTA</option>
+                            <option value="EM_ANDAMENTO" th:selected="${statusSelecionado == 'EM_ANDAMENTO'}">EM ANDAMENTO</option>
+                            <option value="FINALIZADA" th:selected="${statusSelecionado == 'FINALIZADA'}">FINALIZADA</option>
+                            <option value="CANCELADA" th:selected="${statusSelecionado == 'CANCELADA'}">CANCELADA</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="cliente">CLIENTE</label>
+                        <input class="form-input"
+                               type="text"
+                               id="cliente"
+                               name="cliente"
+                               placeholder="DIGITE O NOME DO CLIENTE"
+                               th:value="${clienteSelecionado}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="servico">SERVIÇO</label>
+                        <input class="form-input"
+                               type="text"
+                               id="servico"
+                               name="servico"
+                               placeholder="DIGITE O SERVIÇO"
+                               th:value="${servicoSelecionado}">
+                    </div>
+
+                    <div class="form-group filtro-botoes">
+                        <label class="form-label label-invisivel">AÇÃO</label>
+                        <div class="filtro-acoes">
+                            <button type="submit" class="primary-button">
+                                <i class="bi bi-search"></i>
+                                BUSCAR
+                            </button>
+
+                            <a class="secondary-button" th:href="@{/ordens}">
+                                <i class="bi bi-eraser"></i>
+                                LIMPAR
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>CLIENTE</th>
+                        <th>SERVIÇO</th>
+                        <th>STATUS</th>
+                        <th>VALOR TOTAL</th>
+                        <th>DATA</th>
+                        <th>AÇÕES</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="ordem : ${ordens}">
+                        <td th:text="${ordem.idOs}"></td>
+
+                        <td>
+                            <button type="button"
+                                    class="cliente-toggle"
+                                    th:attr="onclick=|alternarDetalhes('cliente-${ordem.idOs}')|">
+                                <span th:text="${ordem.cliente.nome}"></span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+
+                            <div class="cliente-detalhes" th:id="|cliente-${ordem.idOs}|">
+                                <p>
+                                    <strong>SERVIÇO:</strong>
+                                    <span th:text="${ordemService.buscarDescricaoServico(ordem.idOs)}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>OBSERVAÇÃO:</strong>
+                                    <span th:text="${ordem.observacao != null ? ordem.observacao : 'NÃO INFORMADA'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>DATA DE ABERTURA:</strong>
+                                    <span th:text="${#temporals.format(ordem.dataAbertura, 'dd/MM/yyyy')}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>PREVISÃO:</strong>
+                                    <span th:text="${ordem.dataPrevistaConclusao != null ? #temporals.format(ordem.dataPrevistaConclusao, 'dd/MM/yyyy') : 'NÃO DEFINIDA'}"></span>
+                                </p>
+                            </div>
+                        </td>
+
+                        <td th:text="${ordemService.buscarDescricaoServico(ordem.idOs)}"></td>
+
+                        <td>
+                            <span class="status-badge"
+                                  th:text="${ordem.status}"
+                                  th:classappend="${
+                                      ordem.status == 'aberta' or ordem.status == 'ABERTA' ? ' status-aberta' :
+                                      (ordem.status == 'em andamento' or ordem.status == 'EM_ANDAMENTO' ? ' status-andamento' :
+                                      (ordem.status == 'finalizado' or ordem.status == 'FINALIZADA' ? ' status-finalizada' :
+                                      (ordem.status == 'cancelada' or ordem.status == 'CANCELADA' ? ' status-cancelada' : '')))
+                                  }">
+                            </span>
+                        </td>
+
+                        <td th:text="${'R$ ' + #numbers.formatDecimal(ordem.valorTotal, 1, 'POINT', 2, 'COMMA')}"></td>
+
+                        <td th:text="${#temporals.format(ordem.dataAbertura, 'dd/MM/yyyy')}"></td>
+
+                        <td>
+                            <div class="acoes-tabela">
+                                <a class="action-icon edit-icon"
+                                   th:href="@{/ordens/editar/{id}(id=${ordem.idOs})}"
+                                   title="EDITAR">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <a class="action-icon pdf-icon"
+                                   th:href="@{/ordens/pdf/{id}(id=${ordem.idOs})}"
+                                   title="BAIXAR PDF">
+                                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                                </a>
+
+                                <a class="action-icon email-icon"
+                                   th:href="@{/ordens/email/{id}(id=${ordem.idOs})}"
+                                   title="ENVIAR E-MAIL">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </a>
+
+                                <a class="action-icon delete-icon"
+                                   th:href="@{/ordens/excluir/{id}(id=${ordem.idOs})}"
+                                   onclick="return confirm('Tem certeza que deseja excluir esta ordem de serviço?')"
+                                   title="EXCLUIR">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(ordens)}">
+                        <td colspan="7" class="empty-message">
+                            NENHUMA ORDEM DE SERVIÇO CADASTRADA.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script th:src="@{/js/sistema.js}"></script>
 </body>
 </html>

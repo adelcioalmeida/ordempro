@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CADASTRO DE USUÁRIO</title>
+
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu aberto">
+                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
+                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+                    <a class="submenu-link active" th:href="@{/usuarios}">USUÁRIO</a>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu">
+                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
+                    <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
+                </div>
+            </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <section class="content-card">
+            <div class="page-header">
+                <h1 class="page-title"
+                    th:text="${usuario.idUsuario != null ? 'EDIÇÃO DE USUÁRIO' : 'CADASTRO DE USUÁRIO'}">
+                    CADASTRO DE USUÁRIO
+                </h1>
+
+                <a class="secondary-button" th:href="@{/usuarios}">
+                    <i class="bi bi-arrow-left-circle"></i>
+                    VOLTAR
+                </a>
+            </div>
+
+            <form th:action="@{/usuarios/salvar}" th:object="${usuario}" method="post">
+                <input type="hidden" th:field="*{idUsuario}">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="nome">NOME COMPLETO</label>
+                        <input class="form-input" type="text" id="nome" th:field="*{nome}" placeholder="Digite o nome do usuário" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">E-MAIL</label>
+                        <input class="form-input" type="email" id="email" th:field="*{email}" placeholder="Digite o e-mail" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="telefone">TELEFONE</label>
+                        <input class="form-input"
+                               type="text"
+                               id="telefone"
+                               th:field="*{telefone}"
+                               inputmode="numeric"
+                               maxlength="15"
+                               placeholder="(00) 00000-0000">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="senhaHash">SENHA</label>
+
+                        <div class="senha-wrapper">
+                            <input class="form-input campo-senha"
+                                   type="password"
+                                   id="senhaHash"
+                                   th:field="*{senhaHash}"
+                                   th:placeholder="${usuario.idUsuario != null ? 'Deixe em branco para manter a senha atual' : 'Digite a senha'}">
+
+                            <button type="button"
+                                    class="botao-olho"
+                                    onclick="toggleSenha()"
+                                    aria-label="Mostrar ou ocultar senha">
+                                <i id="iconeSenha" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="funcao">FUNÇÃO</label>
+                        <select class="form-select" id="funcao" th:field="*{funcao}" required>
+                            <option value="">SELECIONE UMA FUNÇÃO</option>
+                            <option th:each="funcao : ${funcoes}"
+                                    th:value="${funcao.idFuncao}"
+                                    th:text="${funcao.nome}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="ativo">STATUS</label>
+                        <select class="form-select" id="ativo" th:field="*{ativo}">
+                            <option th:value="true">ATIVO</option>
+                            <option th:value="false">INATIVO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">
+                        <i class="bi bi-check-circle"></i>
+                        <span th:text="${usuario.idUsuario != null ? 'ATUALIZAR USUÁRIO' : 'SALVAR USUÁRIO'}">SALVAR USUÁRIO</span>
+                    </button>
+
+                    <a class="secondary-button" th:href="@{/usuarios}">
+                        <i class="bi bi-x-circle"></i>
+                        CANCELAR
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+
+<script th:src="@{/js/sistema.js}"></script>
+</body>
+</html>

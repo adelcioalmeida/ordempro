@@ -1,5 +1,6 @@
 package br.com.ordempro.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,4 +21,7 @@ public class Cidade {
 
     private String nome;
     private String uf;
+
+    @Column(name = "nome_normalizado")
+    private String nomeNormalizado;
 }

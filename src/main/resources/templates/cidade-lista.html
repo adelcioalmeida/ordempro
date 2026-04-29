@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CIDADES CADASTRADAS</title>
+
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script th:src="@{/js/sistema.js}" defer></script>
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu aberto">
+                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
+                    <a class="submenu-link active" th:href="@{/cidades}">CIDADE</a>
+                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu">
+                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
+                    <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
+                </div>
+            </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <section class="content-card">
+            <div class="page-header">
+                <h1 class="page-title">CIDADES CADASTRADAS</h1>
+
+                <a class="primary-button" th:href="@{/cidades/nova}">
+                    <i class="bi bi-plus-circle"></i>
+                    NOVA CIDADE
+                </a>
+            </div>
+
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}"></span>
+            </div>
+
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}"></span>
+            </div>
+
+            <form class="filtro-form" method="get" th:action="@{/cidades}">
+                <div class="form-group">
+                    <label class="form-label" for="filtro">BUSCA</label>
+                    <input
+                            class="form-input"
+                            type="text"
+                            id="filtro"
+                            name="filtro"
+                            placeholder="BUSQUE POR NOME OU UF"
+                            th:value="${filtroSelecionado}">
+                </div>
+
+                <div class="filtro-acoes">
+                    <button type="submit" class="primary-button">
+                        <i class="bi bi-search"></i>
+                        BUSCAR
+                    </button>
+
+                    <a th:href="@{/cidades}" class="secondary-button">
+                        <i class="bi bi-eraser"></i>
+                        LIMPAR
+                    </a>
+                </div>
+            </form>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>UF</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="cidade : ${cidades}">
+                        <td th:text="${cidade.idCidade}"></td>
+                        <td th:text="${cidade.nome}"></td>
+                        <td th:text="${cidade.uf}"></td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(cidades)}">
+                        <td colspan="4" class="empty-message">
+                            NENHUMA CIDADE ENCONTRADA.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

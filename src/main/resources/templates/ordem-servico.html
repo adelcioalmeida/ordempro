@@ -1,156 +1,250 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Nova Ordem de Serviço</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORDEM DE SERVIÇO</title>
 
-        h1 {
-            margin-bottom: 20px;
-        }
-
-        .mensagem {
-            color: green;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .bloco {
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-
-        .linha {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-
-        .campo {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        input, select {
-            padding: 8px;
-            font-size: 14px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        a {
-            display: inline-block;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
-<h1>Nova Ordem de Serviço</h1>
-
-<p th:if="${mensagem}" th:text="${mensagem}" class="mensagem"></p>
-
-<form th:action="@{/ordens/salvar}" th:object="${ordemForm}" method="post">
-
-    <div class="bloco">
-        <h2>Dados da Ordem</h2>
-
-        <div class="linha">
-            <div class="campo">
-                <label>Cliente:</label>
-                <select th:field="*{idCliente}">
-                    <option value="">Selecione</option>
-                    <option th:each="cliente : ${clientes}"
-                            th:value="${cliente.idCliente}"
-                            th:text="${cliente.nome}">
-                    </option>
-                </select>
-            </div>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
         </div>
 
-        <div class="linha">
-            <div class="campo">
-                <label>Data de Abertura:</label>
-                <input type="datetime-local" th:field="*{dataAbertura}">
+        <nav class="sidebar-menu">
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu">
+                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
+                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
+                </div>
             </div>
 
-            <div class="campo">
-                <label>Data Prevista de Conclusão:</label>
-                <input type="datetime-local" th:field="*{dataPrevistaConclusao}">
+            <div class="menu-group">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-ordens')">
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu aberto">
+                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
+                    <a class="submenu-link active" th:href="@{/ordens/nova}">NOVA</a>
+                </div>
             </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <section class="content-card">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title" th:if="${modoEdicao != null and modoEdicao}">EDITAR ORDEM DE SERVIÇO</h1>
+                    <h1 class="page-title" th:unless="${modoEdicao != null and modoEdicao}">NOVA ORDEM DE SERVIÇO</h1>
+
+                    <p class="page-subtitle" th:if="${modoEdicao != null and modoEdicao}">
+                        ATUALIZE OS DADOS DA ORDEM
+                    </p>
+                    <p class="page-subtitle" th:unless="${modoEdicao != null and modoEdicao}">
+                        PREENCHA OS DADOS PARA CADASTRAR UMA NOVA ORDEM
+                    </p>
+                </div>
+
+                <a class="secondary-button" th:href="@{/ordens}">
+                    <i class="bi bi-arrow-left"></i>
+                    VOLTAR
+                </a>
+            </div>
+
+            <div th:if="${erro}" class="alerta alerta-erro" th:text="${erro}"></div>
+
+            <form th:action="@{/ordens/salvar}" th:object="${ordemForm}" method="post" class="filtro-form">
+                <input type="hidden" th:field="*{idOs}">
+                <input type="hidden" th:field="*{idItem}">
+
+                <input type="hidden" id="idCliente" th:field="*{idCliente}">
+
+                <div class="filtro-grid ordem-grid">
+                    <div class="form-group">
+                        <label class="form-label">CLIENTE</label>
+
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input class="form-input"
+                                   type="text"
+                                   id="nomeClienteSelecionado"
+                                   placeholder="SELECIONE UM CLIENTE"
+                                   readonly>
+
+                            <button type="button"
+                                    class="btn-selecionar"
+                                    onclick="abrirModalClientes()"
+                                    style="white-space: nowrap;">
+                                <i class="bi bi-search"></i>
+                                BUSCAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="idServico">SERVIÇO PRÉ-CADASTRADO (OPCIONAL)</label>
+                        <select class="form-select" id="idServico" th:field="*{idServico}">
+                            <option value="">DESCREVER MANUALMENTE</option>
+                            <option th:each="servico : ${servicos}"
+                                    th:value="${servico.idServico}"
+                                    th:text="${servico.nome}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="status">STATUS</label>
+                        <select class="form-select" id="status" th:field="*{status}">
+                            <option value="ABERTA">ABERTA</option>
+                            <option value="EM_ANDAMENTO">EM ANDAMENTO</option>
+                            <option value="FINALIZADA">FINALIZADA</option>
+                            <option value="CANCELADA">CANCELADA</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="valor">VALOR</label>
+                        <input class="form-input"
+                               type="text"
+                               id="valor"
+                               th:field="*{valor}"
+                               inputmode="numeric"
+                               placeholder="0,00">
+                    </div>
+
+                    <div class="form-group campo-data-menor">
+                        <label class="form-label" for="dataAbertura">DATA DE ABERTURA</label>
+                        <input class="form-input data-input"
+                               type="datetime-local"
+                               id="dataAbertura"
+                               th:field="*{dataAbertura}">
+                    </div>
+
+                    <div class="form-group campo-data-menor">
+                        <label class="form-label" for="dataPrevistaConclusao">PREVISÃO DE CONCLUSÃO</label>
+                        <input class="form-input data-input"
+                               type="datetime-local"
+                               id="dataPrevistaConclusao"
+                               th:field="*{dataPrevistaConclusao}">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 3;">
+                        <label class="form-label" for="descricao">DESCRIÇÃO DO SERVIÇO</label>
+                        <textarea class="form-input auto-expand"
+                                  id="descricao"
+                                  th:field="*{descricao}"
+                                  rows="2"
+                                  placeholder="DESCREVA O SERVIÇO"
+                                  required></textarea>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 3;">
+                        <label class="form-label" for="observacao">OBSERVAÇÃO</label>
+                        <textarea class="form-input auto-expand"
+                                  id="observacao"
+                                  th:field="*{observacao}"
+                                  rows="4"
+                                  placeholder="OBSERVAÇÕES ADICIONAIS"></textarea>
+                    </div>
+                </div>
+
+                <div class="filtro-acoes" style="margin-top: 20px;">
+                    <button type="submit" class="primary-button" th:if="${modoEdicao != null and modoEdicao}">
+                        <i class="bi bi-check-circle"></i>
+                        ATUALIZAR ORDEM
+                    </button>
+
+                    <button type="submit" class="primary-button" th:unless="${modoEdicao != null and modoEdicao}">
+                        <i class="bi bi-check-circle"></i>
+                        SALVAR ORDEM
+                    </button>
+
+                    <a class="secondary-button" th:href="@{/ordens}">
+                        <i class="bi bi-x-circle"></i>
+                        CANCELAR
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+
+<div id="modalClientes" class="modal-clientes">
+    <div class="modal-clientes-card">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title" style="font-size: 1.4rem;">BUSCAR CLIENTE</h2>
+                <p class="page-subtitle">PESQUISE E SELECIONE O CLIENTE PARA A ORDEM</p>
+            </div>
+
+            <button type="button" class="secondary-button" onclick="fecharModalClientes()">
+                <i class="bi bi-x-circle"></i>
+                FECHAR
+            </button>
         </div>
 
-        <div class="linha">
-            <div class="form-group">
-                <label for="status">Status:</label>
-                <select id="status" name="status" class="form-control" required>
-                    <option value="">Selecione</option>
-                    <option value="ABERTA">Aberta</option>
-                    <option value="EM_ANDAMENTO">Em andamento</option>
-                    <option value="FINALIZADA">Finalizada</option>
-                    <option value="CANCELADA">Cancelada</option>
-                </select>
-            </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="buscaClienteModal">BUSCA</label>
+            <input class="form-input"
+                   type="text"
+                   id="buscaClienteModal"
+                   placeholder="DIGITE O NOME, CPF OU TELEFONE"
+                   oninput="filtrarClientesModal()">
+        </div>
 
-            <div class="campo">
-                <label>Observação:</label>
-                <input type="text" th:field="*{observacao}">
-            </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>NOME</th>
+                    <th>CPF</th>
+                    <th>TELEFONE</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr class="linha-cliente-modal"
+                    style="cursor: pointer;"
+                    th:each="cliente : ${clientes}"
+                    th:attr="data-busca=${cliente.nome + ' ' + cliente.cpf + ' ' + cliente.telefone}, onclick=|selecionarCliente('${cliente.idCliente}', '${cliente.nome}')|">
+                    <td th:text="${cliente.nome}"></td>
+                    <td th:text="${cliente.cpf != null ? cliente.cpf : 'NÃO INFORMADO'}"></td>
+                    <td th:text="${cliente.telefone != null ? cliente.telefone : 'NÃO INFORMADO'}"></td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(clientes)}">
+                    <td colspan="3" class="empty-message">
+                        NENHUM CLIENTE CADASTRADO.
+                    </td>
+                </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+        <div class="form-actions" style="margin-top: 18px;">
+            <a class="secondary-button" th:href="@{/clientes/novo(origem='ordem')}" target="_blank">
+                <i class="bi bi-plus-circle"></i>
+                CADASTRAR CLIENTE
+            </a>
         </div>
     </div>
+</div>
 
-    <div class="bloco">
-        <h2>Item do Serviço</h2>
-
-        <div class="linha">
-            <div class="campo">
-                <label>Serviço:</label>
-                <select th:field="*{idServico}">
-                    <option value="">Selecione</option>
-                    <option th:each="servico : ${servicos}"
-                            th:value="${servico.idServico}"
-                            th:text="${servico.nome}">
-                    </option>
-                </select>
-            </div>
-        </div>
-
-        <div class="linha">
-            <div class="campo">
-                <label>Descrição:</label>
-                <input type="text" th:field="*{descricao}">
-            </div>
-        </div>
-
-        <div class="linha">
-            <div class="campo">
-                <label>Valor:</label>
-                <input type="number" step="0.01" th:field="*{valor}">
-            </div>
-        </div>
-    </div>
-
-    <button type="submit">Salvar Ordem de Serviço</button>
-</form>
-
-<br>
-<a href="/ordens">Ver Ordens Cadastradas</a>
+<script th:src="@{/js/sistema.js}"></script>
 
 </body>
 </html>

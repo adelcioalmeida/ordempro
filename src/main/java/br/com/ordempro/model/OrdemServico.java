@@ -26,27 +26,30 @@ public class OrdemServico {
     private Long idOs;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_cliente")
+    @JoinColumn(name = "id_cliente", nullable = false)
     private Cliente cliente;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "data_abertura")
+    @Column(name = "data_abertura", nullable = false)
     private LocalDateTime dataAbertura;
 
     @Column(name = "data_prevista_conclusao")
     private LocalDateTime dataPrevistaConclusao;
 
+    @Column(name = "status", nullable = false, length = 30)
     private String status;
+
+    @Column(name = "observacao", length = 500)
     private String observacao;
 
-    @Column(name = "valor_total")
+    @Column(name = "valor_total", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorTotal;
 
-    @Column(name = "email_enviado")
-    private Boolean emailEnviado;
+    @Column(name = "email_enviado", nullable = false)
+    private Boolean emailEnviado = false;
 
     @Column(name = "data_envio_email")
     private LocalDateTime dataEnvioEmail;
