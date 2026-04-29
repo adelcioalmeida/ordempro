@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -218,11 +221,12 @@
                                     <i class="bi bi-envelope-fill"></i>
                                 </a>
 
-                                <a class="action-icon delete-icon"
-                                   th:href="@{/ordens/excluir/{id}(id=${ordem.idOs})}"
-                                   onclick="return confirm('Tem certeza que deseja excluir esta ordem de serviço?')"
-                                   title="EXCLUIR">
-                                    <i class="bi bi-trash-fill"></i>
+                                <a sec:authorize="hasAnyRole('ADMIN', 'GERENTE')"
+                                   th:if="${ordem.status != 'FINALIZADA' and ordem.status != 'CANCELADA'}"
+                                   th:href="@{/ordens/cancelar/{id}(id=${ordem.idOs})}"
+                                   class="btn btn-warning btn-sm"
+                                   onclick="return confirm('Deseja realmente cancelar esta ordem de serviço?')">
+                                    Cancelar Ordem
                                 </a>
                             </div>
                         </td>

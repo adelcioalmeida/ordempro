@@ -28,6 +28,10 @@ import java.time.LocalDateTime;
 @Controller
 public class OrdemServicoController {
 
+    private static final String STATUS_ABERTA = "ABERTA";
+    private static final String STATUS_FINALIZADA = "FINALIZADA";
+    private static final String STATUS_CANCELADA = "CANCELADA";
+
     private final OrdemServicoService ordemServicoService;
     private final ClienteService clienteService;
     private final ServicoService servicoService;
@@ -60,7 +64,7 @@ public class OrdemServicoController {
             Model model
     ) {
         OrdemServicoFormDTO form = new OrdemServicoFormDTO();
-        form.setStatus("ABERTA");
+        form.setStatus(STATUS_ABERTA);
 
         if (idCliente != null) {
             form.setIdCliente(idCliente);
@@ -171,8 +175,8 @@ public class OrdemServicoController {
         return "redirect:/ordens";
     }
 
-    @GetMapping("/ordens/excluir/{id}")
-    public String excluirOrdem(
+    @GetMapping("/ordens/cancelar/{id}")
+    public String cancelarOrdem(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes
     ) {
@@ -183,10 +187,20 @@ public class OrdemServicoController {
             return "redirect:/ordens";
         }
 
-        itemOrdemServicoService.excluirPorIdOrdem(id);
-        ordemServicoService.excluirPorId(id);
+        if (statusIgual(ordemServico, STATUS_FINALIZADA)) {
+            redirectAttributes.addFlashAttribute("erro", "Ordem finalizada não pode ser cancelada.");
+            return "redirect:/ordens";
+        }
 
-        redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço excluída com sucesso.");
+        if (statusIgual(ordemServico, STATUS_CANCELADA)) {
+            redirectAttributes.addFlashAttribute("erro", "Esta ordem já está cancelada.");
+            return "redirect:/ordens";
+        }
+
+        ordemServico.setStatus(STATUS_CANCELADA);
+        ordemServicoService.salvar(ordemServico);
+
+        redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço cancelada com sucesso.");
         return "redirect:/ordens";
     }
 
@@ -316,6 +330,11 @@ public class OrdemServicoController {
         }
 
         return new ItemOrdemServico();
+    }
+
+    private boolean statusIgual(OrdemServico ordemServico, String status) {
+        return ordemServico.getStatus() != null &&
+                ordemServico.getStatus().equalsIgnoreCase(status);
     }
 
     private String carregarFormulario(Model model) {
