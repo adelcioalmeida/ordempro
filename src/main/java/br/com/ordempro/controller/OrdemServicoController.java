@@ -123,7 +123,7 @@ public class OrdemServicoController {
 
         Cliente cliente = clienteService.buscarPorId(form.getIdCliente());
         Servico servico = form.getIdServico() != null ? servicoService.buscarPorId(form.getIdServico()) : null;
-        Usuario usuario = usuarioService.buscarPorId(1L);
+        Usuario usuario = usuarioService.buscarUsuarioLogado();
 
         if (cliente == null || usuario == null) {
             model.addAttribute("erro", "Cliente ou usuário inválido.");

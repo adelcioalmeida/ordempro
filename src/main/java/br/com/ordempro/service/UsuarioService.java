@@ -2,6 +2,8 @@ package br.com.ordempro.service;
 
 import br.com.ordempro.model.Usuario;
 import br.com.ordempro.repository.UsuarioRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,22 @@ public class UsuarioService {
 
     public Usuario buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email).orElse(null);
+    }
+
+    public Usuario buscarUsuarioLogado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String emailUsuarioLogado = authentication.getName();
+
+        if (emailUsuarioLogado == null || emailUsuarioLogado.isBlank()) {
+            return null;
+        }
+
+        return buscarPorEmail(emailUsuarioLogado);
     }
 
     public Usuario salvar(Usuario usuario) {
