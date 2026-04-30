@@ -14,6 +14,8 @@ import java.util.List;
 @Transactional
 public class OrdemServicoService {
 
+    private static final String STATUS_CANCELADA = "CANCELADA";
+
     private final OrdemServicoRepository ordemServicoRepository;
     private final ItemOrdemServicoRepository itemRepository;
 
@@ -63,24 +65,34 @@ public class OrdemServicoService {
         return ordemServicoRepository.existsById(id);
     }
 
-    public void excluirPorId(Long id) {
-        ordemServicoRepository.deleteById(id);
-    }
+    public void cancelarPorId(Long id) {
+        OrdemServico ordemServico = buscarPorId(id);
 
-    private String normalizarFiltro(String valor) {
-        if (valor == null || valor.isBlank()) {
-            return null;
+        if (ordemServico == null) {
+            return;
         }
-        return valor.trim();
+
+        ordemServico.setStatus(STATUS_CANCELADA);
+        ordemServicoRepository.save(ordemServico);
     }
 
-    // 🔥 NOVO MÉTODO
+    /**
+     * Método mantido para evitar quebra em outras partes do sistema.
+     * Não realiza exclusão física da ordem de serviço.
+     * A regra do sistema é manter o histórico e apenas cancelar a ordem.
+     */
+    public void excluirPorId(Long id) {
+        cancelarPorId(id);
+    }
+
     public String buscarDescricaoServico(Long idOs) {
         ItemOrdemServico item = itemRepository
                 .findFirstByOrdemServico_IdOs(idOs)
                 .orElse(null);
 
-        if (item == null) return "NÃO INFORMADO";
+        if (item == null) {
+            return "NÃO INFORMADO";
+        }
 
         if (item.getDescricao() != null && !item.getDescricao().isBlank()) {
             return item.getDescricao();
@@ -91,5 +103,13 @@ public class OrdemServicoService {
         }
 
         return "NÃO INFORMADO";
+    }
+
+    private String normalizarFiltro(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.trim();
     }
 }
