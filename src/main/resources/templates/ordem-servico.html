@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,38 +12,52 @@
 </head>
 <body>
 
+<nav class="sidebar-menu">
+
+    <a class="sidebar-link home-link" th:href="@{/ordens}">
+        HOME
+    </a>
+
+    <div class="menu-group" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+        <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+            CADASTRO
+        </button>
+
+        <div id="submenu-cadastro" class="submenu">
+            <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
+            <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+
+            <a class="submenu-link"
+               sec:authorize="hasRole('ADMIN')"
+               th:href="@{/usuarios}">
+                USUÁRIO
+            </a>
+        </div>
+    </div>
+
+    <div class="menu-group">
+        <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-ordens')">
+            ORDENS DE SERVIÇO
+        </button>
+
+        <div id="submenu-ordens" class="submenu aberto">
+            <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
+            <a class="submenu-link active" th:href="@{/ordens/nova}">NOVA</a>
+        </div>
+    </div>
+
+    <a class="sidebar-link sair-link" th:href="@{/logout}">
+        SAIR
+    </a>
+</nav>
+
 <div class="layout">
     <aside class="sidebar">
         <div class="sidebar-logo">
             <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
         </div>
 
-        <nav class="sidebar-menu">
-            <div class="menu-group">
-                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
-                    CADASTRO
-                </button>
 
-                <div id="submenu-cadastro" class="submenu">
-                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
-                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
-                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
-                </div>
-            </div>
-
-            <div class="menu-group">
-                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-ordens')">
-                    ORDENS DE SERVIÇO
-                </button>
-
-                <div id="submenu-ordens" class="submenu aberto">
-                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
-                    <a class="submenu-link active" th:href="@{/ordens/nova}">NOVA</a>
-                </div>
-            </div>
-
-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
-        </nav>
     </aside>
 
     <main class="main-content">
