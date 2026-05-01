@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Controller
 public class ClienteController {
@@ -39,6 +41,9 @@ public class ClienteController {
             @RequestParam(required = false) String origem,
             Model model
     ) {
+        if (isVendedorSemOrigemOrdem(origem)) {
+            return "redirect:/acesso-negado";
+        }
         model.addAttribute("cliente", new Cliente());
         model.addAttribute("cidades", cidadeService.listarTodas());
         model.addAttribute("origem", origem);
@@ -71,6 +76,10 @@ public class ClienteController {
             @RequestParam(required = false) String origem,
             RedirectAttributes redirectAttributes
     ) {
+        if (isVendedorSemOrigemOrdem(origem)) {
+            redirectAttributes.addFlashAttribute("erro", "Vendedor pode cadastrar cliente apenas no fluxo de ordem.");
+            return "redirect:/clientes";
+        }
         clienteService.salvar(cliente);
         redirectAttributes.addFlashAttribute("sucesso", "Cliente salvo com sucesso.");
 
@@ -79,6 +88,18 @@ public class ClienteController {
         }
 
         return "redirect:/clientes";
+    }
+
+    private boolean isVendedorSemOrigemOrdem(String origem) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+
+        boolean isVendedor = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_VENDEDOR".equals(authority.getAuthority()));
+
+        return isVendedor && !"ordem".equalsIgnoreCase(origem);
     }
 
     @GetMapping("/clientes/excluir/{id}")

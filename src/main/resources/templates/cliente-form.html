@@ -1,16 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>CADASTRO CLIENTE</title>
-
+<!DOCTYPE html> <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"> <head> <meta charset="UTF-8"> <title>CADASTRO CLIENTE</title>
     <link rel="stylesheet" th:href="@{/css/sistema.css}">
     <script th:src="@{/js/sistema.js}" defer></script>
-</head>
-<body>
-
-<div class="layout">
-
+</head> <body> <div class="layout">
     <aside class="sidebar">
         <div class="sidebar-logo">
             <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
@@ -26,7 +17,7 @@
             </div>
 
             <a class="sidebar-link" th:href="@{/ordens}">ORDENS DE SERVIÇO</a>
-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
         </nav>
     </aside>
 
@@ -63,8 +54,19 @@
                     </div>
 
                     <div class="form-group campo-telefone-menor">
+                        <label>DATA DE NASCIMENTO</label>
+                        <input type="date" th:field="*{dataNascimento}" class="form-input">
+                    </div>
+
+                    <div class="form-group campo-telefone-menor">
                         <label>TELEFONE</label>
                         <input type="text" id="telefone" th:field="*{telefone}" class="form-input"
+                               maxlength="15" placeholder="(00) 00000-0000">
+                    </div>
+
+                    <div class="form-group campo-telefone-menor">
+                        <label>CELULAR</label>
+                        <input type="text" id="celular" th:field="*{celular}" class="form-input"
                                maxlength="15" placeholder="(00) 00000-0000">
                     </div>
 
@@ -82,13 +84,19 @@
 
                     <div class="form-group campo-cidade-maior">
                         <label>CIDADE</label>
-                        <select id="cidade" th:field="*{cidade}" class="form-select">
+                        <select id="cidade" th:field="*{cidade}" class="form-select" onchange="atualizarUfCliente()">
                             <option value="">SELECIONE</option>
                             <option th:each="cidade : ${cidades}"
                                     th:value="${cidade.idCidade}"
-                                    th:text="${cidade.nome + ' - ' + cidade.uf}">
+                                    th:attr="data-uf=${cidade.uf}"
+                                    th:text="${cidade.nome}">
                             </option>
                         </select>
+                    </div>
+
+                    <div class="form-group campo-cpf-menor">
+                        <label>UF</label>
+                        <input type="text" id="ufCliente" class="form-input" readonly placeholder="UF">
                     </div>
 
                     <div class="form-group campo-endereco-maior">
@@ -117,8 +125,7 @@
 
         </div>
     </main>
+</div> </body> </html>
 
-</div>
 
-</body>
-</html>
+

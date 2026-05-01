@@ -1,48 +1,34 @@
-<!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>CLIENTES CADASTRADOS</title>
-
+<!DOCTYPE html> <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>CLIENTES</title>
     <link rel="stylesheet" th:href="@{/css/sistema.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script th:src="@{/js/sistema.js}" defer></script>
-</head>
-<body>
+</head> <body> <div class="layout"> <aside class="sidebar"> <div class="sidebar-logo"> <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro"> </div>
+    <nav class="sidebar-menu">
+        <div class="menu-group">
+            <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                CADASTRO
+            </button>
 
-<div class="layout">
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
+            <div id="submenu-cadastro" class="submenu aberto">
+                <a class="submenu-link active" th:href="@{/clientes}">CLIENTE</a>
+                <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+                <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
+            </div>
         </div>
 
-        <nav class="sidebar-menu">
-            <div class="menu-group">
-                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
-                    CADASTRO
-                </button>
+        <div class="menu-group">
+            <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                ORDENS DE SERVIÇO
+            </button>
 
-                <div id="submenu-cadastro" class="submenu aberto">
-                    <a class="submenu-link active" th:href="@{/clientes}">CLIENTE</a>
-                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
-                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
-                </div>
+            <div id="submenu-ordens" class="submenu">
+                <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
+                <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
             </div>
+        </div>
 
-            <div class="menu-group">
-                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
-                    ORDENS DE SERVIÇO
-                </button>
-
-                <div id="submenu-ordens" class="submenu">
-                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
-                    <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
-                </div>
-            </div>
-
-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
-        </nav>
-    </aside>
+        <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+    </nav>
+</aside>
 
     <main class="main-content">
         <section class="content-card">
@@ -54,42 +40,44 @@
                     </p>
                 </div>
 
-                <a class="primary-button" th:href="@{/clientes/novo(origem=${origem})}">
+                <a class="primary-button"
+                   th:href="@{/clientes/novo(origem=${origem})}">
                     <i class="bi bi-plus-circle"></i>
                     NOVO CLIENTE
                 </a>
             </div>
 
             <div th:if="${sucesso}" class="alerta alerta-sucesso" th:text="${sucesso}"></div>
-            <div th:if="${erro}" class="alerta alerta-erro">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span th:text="${erro}"></span>
-            </div>
+            <div th:if="${erro}" class="alerta alerta-erro" th:text="${erro}"></div>
 
             <form class="filtro-form" method="get" th:action="@{/clientes}">
                 <input type="hidden" name="origem" th:value="${origem}">
 
-                <div class="form-group">
-                    <label class="form-label" for="filtro">BUSCA</label>
-                    <input
-                            class="form-input"
-                            type="text"
-                            id="filtro"
-                            name="filtro"
-                            placeholder="BUSQUE POR NOME, CPF OU CIDADE"
-                            th:value="${filtroSelecionado}">
-                </div>
+                <div class="filtro-grid">
+                    <div class="form-group" style="grid-column: span 3;">
+                        <label class="form-label" for="filtro">BUSCA</label>
+                        <input class="form-input"
+                               type="text"
+                               id="filtro"
+                               name="filtro"
+                               placeholder="DIGITE NOME, CPF OU TELEFONE"
+                               th:value="${filtroSelecionado}">
+                    </div>
 
-                <div class="filtro-acoes">
-                    <button type="submit" class="primary-button">
-                        <i class="bi bi-search"></i>
-                        BUSCAR
-                    </button>
+                    <div class="form-group filtro-botoes">
+                        <label class="form-label label-invisivel">AÇÃO</label>
+                        <div class="filtro-acoes">
+                            <button type="submit" class="primary-button">
+                                <i class="bi bi-search"></i>
+                                BUSCAR
+                            </button>
 
-                    <a th:href="@{/clientes(origem=${origem})}" class="secondary-button">
-                        <i class="bi bi-eraser"></i>
-                        LIMPAR
-                    </a>
+                            <a class="secondary-button" th:href="@{/clientes(origem=${origem})}">
+                                <i class="bi bi-eraser"></i>
+                                LIMPAR
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </form>
 
@@ -120,8 +108,8 @@
                                 <br>
                                 <small th:text="${cliente.cidade != null ? cliente.cidade.nome : 'CIDADE NÃO INFORMADA'}"></small>
                                 <span th:if="${cliente.cep != null and !#strings.isEmpty(cliente.cep)}">
-                                    - <small th:text="${T(br.com.ordempro.util.FormatadorUtils).formatarCep(cliente.cep)}"></small>
-                                </span>
+                                - <small th:text="${T(br.com.ordempro.util.FormatadorUtils).formatarCep(cliente.cep)}"></small>
+                            </span>
                             </div>
                         </td>
                         <td>
@@ -160,7 +148,4 @@
             </div>
         </section>
     </main>
-</div>
-
-</body>
-</html>
+</div> </body> </html>
