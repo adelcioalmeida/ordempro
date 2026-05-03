@@ -24,7 +24,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
             SELECT c
             FROM Cliente c
             LEFT JOIN c.cidade cidade
-            WHERE (:filtro IS NULL OR :filtro = ''
+            WHERE c.ativo = true
+              AND (:filtro IS NULL OR :filtro = ''
                 OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :filtro, '%'))
                 OR LOWER(c.cpf) LIKE LOWER(CONCAT('%', :filtro, '%'))
                 OR LOWER(cidade.nome) LIKE LOWER(CONCAT('%', :filtro, '%')))

@@ -91,7 +91,7 @@ public class ClienteController {
     ) {
         try {
             clienteService.excluirPorId(id);
-            redirectAttributes.addFlashAttribute("sucesso", "Cliente excluído com sucesso.");
+            redirectAttributes.addFlashAttribute("sucesso", "Cliente inativado com sucesso.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("erro", e.getMessage());
         }

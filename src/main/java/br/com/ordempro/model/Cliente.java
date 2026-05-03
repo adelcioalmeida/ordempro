@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.PrePersist;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,8 +35,16 @@ public class Cliente {
     private String numero;
     private String bairro;
     private String cep;
+    private Boolean ativo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cidade")
     private Cidade cidade;
+
+    @PrePersist
+    public void prePersist() {
+        if (ativo == null) {
+            ativo = true;
+        }
+    }
 }

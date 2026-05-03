@@ -38,8 +38,13 @@ public class CidadeController {
             @ModelAttribute Cidade cidade,
             RedirectAttributes redirectAttributes
     ) {
-        cidadeService.salvar(cidade);
-        redirectAttributes.addFlashAttribute("sucesso", "Cidade salva com sucesso.");
+        try {
+            cidadeService.salvar(cidade);
+            redirectAttributes.addFlashAttribute("sucesso", "Cidade salva com sucesso.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("erro", e.getMessage());
+            return "redirect:/cidades/nova";
+        }
         return "redirect:/cidades";
     }
 

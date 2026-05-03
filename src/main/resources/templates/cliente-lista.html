@@ -179,9 +179,9 @@
 
                         <td th:text="${cliente.nome}"></td>
 
-                        <td th:text="${cliente.cpf != null and !#strings.isEmpty(cliente.cpf) ? T(br.com.ordempro.util.FormatadorUtils).formatarCpf(cliente.cpf) : 'NÃO INFORMADO'}"></td>
+                        <td class="col-cpf-nowrap" th:text="${cliente.cpf != null and !#strings.isEmpty(cliente.cpf) ? T(br.com.ordempro.util.FormatadorUtils).formatarCpf(cliente.cpf) : 'NÃO INFORMADO'}"></td>
 
-                        <td th:text="${cliente.telefone != null and !#strings.isEmpty(cliente.telefone) ? T(br.com.ordempro.util.FormatadorUtils).formatarTelefone(cliente.telefone) : 'NÃO INFORMADO'}"></td>
+                        <td class="col-telefone-nowrap" th:text="${cliente.telefone != null and !#strings.isEmpty(cliente.telefone) ? T(br.com.ordempro.util.FormatadorUtils).formatarTelefone(cliente.telefone) : 'NÃO INFORMADO'}"></td>
 
                         <td th:text="${cliente.email != null and !#strings.isEmpty(cliente.email) ? cliente.email : 'NÃO INFORMADO'}"></td>
 
@@ -221,7 +221,7 @@
                                    th:if="${origem != 'ordem'}"
                                    class="action-icon delete-icon"
                                    th:href="@{/clientes/excluir/{id}(id=${cliente.idCliente})}"
-                                   onclick="return confirm('Tem certeza que deseja excluir este cliente?')"
+                                   onclick="return confirm('Tem certeza que deseja inativar este cliente?')"
                                    title="EXCLUIR">
                                     <i class="bi bi-trash-fill"></i>
                                 </a>

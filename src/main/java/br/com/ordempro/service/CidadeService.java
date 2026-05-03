@@ -4,6 +4,7 @@ import br.com.ordempro.model.Cidade;
 import br.com.ordempro.repository.CidadeRepository;
 import br.com.ordempro.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,26 @@ public class CidadeService {
     }
 
     public Cidade salvar(Cidade cidade) {
+        String nome = cidade.getNome() == null ? "" : cidade.getNome().trim();
+        String uf = cidade.getUf() == null ? "" : cidade.getUf().trim();
+
+        cidade.setNome(nome);
+        cidade.setUf(uf);
+
+        boolean cidadeDuplicada = cidadeRepository
+                .findByNomeIgnoreCaseAndUfIgnoreCase(nome, uf)
+                .filter(existente -> !existente.getIdCidade().equals(cidade.getIdCidade()))
+                .isPresent();
+
+        if (cidadeDuplicada) {
+            throw new IllegalStateException("Essa cidade já está cadastrada.");
+        }
+
+        try {
         return cidadeRepository.save(cidade);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("Essa cidade já está cadastrada.");
+        }
     }
 
     public void excluirPorId(Long id) {

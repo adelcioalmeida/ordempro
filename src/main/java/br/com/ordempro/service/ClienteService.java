@@ -2,7 +2,6 @@ package br.com.ordempro.service;
 
 import br.com.ordempro.model.Cliente;
 import br.com.ordempro.repository.ClienteRepository;
-import br.com.ordempro.repository.OrdemServicoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,14 +10,11 @@ import java.util.List;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
-    private final OrdemServicoRepository ordemServicoRepository;
 
     public ClienteService(
-            ClienteRepository clienteRepository,
-            OrdemServicoRepository ordemServicoRepository
+            ClienteRepository clienteRepository
     ) {
         this.clienteRepository = clienteRepository;
-        this.ordemServicoRepository = ordemServicoRepository;
     }
 
     public List<Cliente> listarTodos() {
@@ -26,6 +22,10 @@ public class ClienteService {
     }
 
     public Cliente salvar(Cliente cliente) {
+        if (cliente.getAtivo() == null) {
+            cliente.setAtivo(true);
+        }
+
         if (cliente.getCep() != null) {
             cliente.setCep(cliente.getCep().replaceAll("\\D", ""));
         }
@@ -50,11 +50,14 @@ public class ClienteService {
     }
 
     public void excluirPorId(Long id) {
-        if (ordemServicoRepository.existsByCliente_IdCliente(id)) {
-            throw new IllegalStateException("Não é possível excluir este cliente, pois ele possui ordem de serviço vinculada.");
+        Cliente cliente = buscarPorId(id);
+
+        if (cliente == null) {
+            throw new IllegalStateException("Cliente não encontrado.");
         }
 
-        clienteRepository.deleteById(id);
+        cliente.setAtivo(false);
+        clienteRepository.save(cliente);
     }
 
     public boolean existeClienteNaCidade(Long idCidade) {

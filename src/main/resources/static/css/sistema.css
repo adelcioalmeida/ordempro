@@ -481,6 +481,11 @@ body {
     white-space: nowrap;
 }
 
+.col-cpf-nowrap,
+.col-telefone-nowrap {
+    white-space: nowrap !important;
+}
+
 .data-table tbody tr:hover {
     background-color: #f4f8fb;
 }
@@ -1121,7 +1126,7 @@ input[name="cep"] {
         left: 0;
         z-index: 100000;
         width: 280px !important;
-        max-width: 82vw;
+        max-width: min(82vw, 300px);
         height: 100vh !important;
         min-height: 100vh !important;
         overflow-y: auto;
@@ -1279,11 +1284,21 @@ input[name="cep"] {
     }
 
     .table-container {
-        overflow-x: visible;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .data-table td {
         white-space: normal;
+    }
+
+    .data-table {
+        min-width: 680px;
+    }
+
+    .col-cpf-nowrap,
+    .col-telefone-nowrap {
+        white-space: nowrap !important;
     }
 
     .ordens-table-container {
@@ -1425,6 +1440,43 @@ input[name="cep"] {
 
     body.menu-mobile-aberto .mobile-menu-button {
         z-index: 100001;
+    }
+
+    body.menu-mobile-aberto {
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 390px) {
+    .main-content {
+        padding: 88px 10px 14px 10px !important;
+    }
+
+    .content-card {
+        padding: 12px !important;
+    }
+
+    .data-table {
+        min-width: 620px;
+    }
+}
+
+@media (max-width: 360px) {
+    .mobile-menu-button {
+        width: 42px;
+        height: 42px;
+        top: 10px;
+        left: 10px;
+    }
+}
+
+@media (max-width: 320px) {
+    .page-title {
+        font-size: 1.2rem !important;
+    }
+
+    .sidebar {
+        max-width: 88vw;
     }
 }
 /* =========================================================
