@@ -1,0 +1,255 @@
+diff --git a/src/main/java/br/com/ordempro/config/SecurityConfig.java b/src/main/java/br/com/ordempro/config/SecurityConfig.java
+index eb37979..ed00ea5 100644
+--- a/src/main/java/br/com/ordempro/config/SecurityConfig.java
++++ b/src/main/java/br/com/ordempro/config/SecurityConfig.java
+@@ -45,11 +45,16 @@ public class SecurityConfig {
+                         // VENDEDOR NÃO pode editar ou excluir cliente
+                         .requestMatchers(
+                                 "/clientes/editar/**",
+-                                "/clientes/atualizar/**",
+                                 "/clientes/excluir/**"
+                         ).hasAnyRole("ADMIN", "GERENTE")
+
+-                        // ADMIN, GERENTE e VENDEDOR podem cadastrar e buscar clientes
++                        // ADMIN e GERENTE podem cadastrar clientes livremente
++                        .requestMatchers(
++                                "/clientes/novo",
++                                "/clientes/salvar"
++                        ).hasAnyRole("ADMIN", "GERENTE", "VENDEDOR")
++
++                        // ADMIN, GERENTE e VENDEDOR podem buscar clientes
+                         .requestMatchers(
+                                 "/clientes",
+                                 "/clientes/**"
+@@ -58,7 +63,6 @@ public class SecurityConfig {
+                         // ADMIN e GERENTE podem editar, atualizar e cancelar ordens
+                         .requestMatchers(
+                                 "/ordens/editar/**",
+-                                "/ordens/atualizar/**",
+                                 "/ordens/cancelar/**"
+                         ).hasAnyRole("ADMIN", "GERENTE")
+
+@@ -98,4 +102,4 @@ public class SecurityConfig {
+
+         return http.build();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/src/main/java/br/com/ordempro/model/Cliente.java b/src/main/java/br/com/ordempro/model/Cliente.java
+index 23a4aff..7514842 100644
+--- a/src/main/java/br/com/ordempro/model/Cliente.java
++++ b/src/main/java/br/com/ordempro/model/Cliente.java
+@@ -11,6 +11,8 @@ import jakarta.persistence.Table;
+ import lombok.Getter;
+ import lombok.Setter;
+
++import java.time.LocalDate;
++
+ @Entity
+ @Table(name = "clientes")
+ @Getter
+@@ -24,7 +26,9 @@ public class Cliente {
+     private String nome;
+     private String cpf;
+     private String rg;
++    private LocalDate dataNascimento;
+     private String telefone;
++    private String celular;
+     private String email;
+     private String endereco;
+     private String numero;
+@@ -34,4 +38,4 @@ public class Cliente {
+     @ManyToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "id_cidade")
+     private Cidade cidade;
+-}
+\ No newline at end of file
++}
+diff --git a/src/main/resources/static/js/sistema.js b/src/main/resources/static/js/sistema.js
+index 258888c..7083c64 100644
+--- a/src/main/resources/static/js/sistema.js
++++ b/src/main/resources/static/js/sistema.js
+@@ -1,10 +1,12 @@
+ document.addEventListener("DOMContentLoaded", function () {
+     configurarBuscaCep();
+     configurarMascaraTelefone();
++    configurarMascaraCelular();
+     configurarMascaraCpf();
+     configurarMascaraCep();
+     configurarMascaraValor();
+     configurarAutoExpandTextareas();
++    atualizarUfCliente();
+ });
+
+ function alternarSubmenu(id) {
+@@ -57,6 +59,15 @@ function configurarMascaraTelefone() {
+     });
+ }
+
++function configurarMascaraCelular() {
++    const camposCelular = document.querySelectorAll("#celular, input[name='celular']");
++    camposCelular.forEach((campo) => {
++        campo.addEventListener("input", function () {
++            campo.value = aplicarMascaraTelefone(campo.value);
++        });
++    });
++}
++
+ function aplicarMascaraTelefone(valor) {
+     let numeros = valor.replace(/\D/g, "");
+
+@@ -259,6 +270,14 @@ function normalizarTexto(texto) {
+         .trim()
+         .toUpperCase();
+ }
++
++function atualizarUfCliente() {
++    const selectCidade = document.getElementById("cidade");
++    const campoUf = document.getElementById("ufCliente");
++    if (!selectCidade || !campoUf) return;
++    const option = selectCidade.options[selectCidade.selectedIndex];
++    campoUf.value = option ? (option.getAttribute("data-uf") || "") : "";
++}
+ function configurarAutoExpandTextareas() {
+     const textareas = document.querySelectorAll(".auto-expand");
+
+@@ -318,4 +337,4 @@ function filtrarClientesModal() {
+         const texto = (linha.getAttribute("data-busca") || "").toUpperCase();
+         linha.style.display = texto.includes(filtro) ? "" : "none";
+     });
+-}
+\ No newline at end of file
++}
+diff --git a/src/main/resources/templates/cidade-form.html b/src/main/resources/templates/cidade-form.html
+index b48ae20..68cc2b4 100644
+--- a/src/main/resources/templates/cidade-form.html
++++ b/src/main/resources/templates/cidade-form.html
+@@ -40,7 +40,7 @@
+                 </div>
+             </div>
+
+-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
++            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+         </nav>
+     </aside>
+
+diff --git a/src/main/resources/templates/cidade-lista.html b/src/main/resources/templates/cidade-lista.html
+index 48ad5a9..8316027 100644
+--- a/src/main/resources/templates/cidade-lista.html
++++ b/src/main/resources/templates/cidade-lista.html
+@@ -40,7 +40,7 @@
+                 </div>
+             </div>
+
+-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
++            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+         </nav>
+     </aside>
+
+diff --git a/src/main/resources/templates/cliente-form.html b/src/main/resources/templates/cliente-form.html
+index a41e816..d734c71 100644
+--- a/src/main/resources/templates/cliente-form.html
++++ b/src/main/resources/templates/cliente-form.html
+@@ -26,7 +26,7 @@
+             </div>
+
+             <a class="sidebar-link" th:href="@{/ordens}">ORDENS DE SERVIÇO</a>
+-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
++            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+         </nav>
+     </aside>
+
+@@ -62,12 +62,23 @@
+                                maxlength="14" placeholder="000.000.000-00">
+                     </div>
+
++                    <div class="form-group campo-telefone-menor">
++                        <label>DATA DE NASCIMENTO</label>
++                        <input type="date" th:field="*{dataNascimento}" class="form-input">
++                    </div>
++
+                     <div class="form-group campo-telefone-menor">
+                         <label>TELEFONE</label>
+                         <input type="text" id="telefone" th:field="*{telefone}" class="form-input"
+                                maxlength="15" placeholder="(00) 00000-0000">
+                     </div>
+
++                    <div class="form-group campo-telefone-menor">
++                        <label>CELULAR</label>
++                        <input type="text" id="celular" th:field="*{celular}" class="form-input"
++                               maxlength="15" placeholder="(00) 00000-0000">
++                    </div>
++
+                     <div class="form-group campo-email-maior">
+                         <label>E-MAIL</label>
+                         <input type="email" th:field="*{email}" class="form-input"
+@@ -82,15 +93,21 @@
+
+                     <div class="form-group campo-cidade-maior">
+                         <label>CIDADE</label>
+-                        <select id="cidade" th:field="*{cidade}" class="form-select">
++                        <select id="cidade" th:field="*{cidade}" class="form-select" onchange="atualizarUfCliente()">
+                             <option value="">SELECIONE</option>
+                             <option th:each="cidade : ${cidades}"
+                                     th:value="${cidade.idCidade}"
+-                                    th:text="${cidade.nome + ' - ' + cidade.uf}">
++                                    th:attr="data-uf=${cidade.uf}"
++                                    th:text="${cidade.nome}">
+                             </option>
+                         </select>
+                     </div>
+
++                    <div class="form-group campo-cpf-menor">
++                        <label>UF</label>
++                        <input type="text" id="ufCliente" class="form-input" readonly placeholder="UF">
++                    </div>
++
+                     <div class="form-group campo-endereco-maior">
+                         <label>ENDEREÇO</label>
+                         <input type="text" th:field="*{endereco}" class="form-input">
+@@ -121,4 +138,4 @@
+ </div>
+
+ </body>
+-</html>
+\ No newline at end of file
++</html>
+diff --git a/src/main/resources/templates/cliente-lista.html b/src/main/resources/templates/cliente-lista.html
+index 128e5dd..4986839 100644
+--- a/src/main/resources/templates/cliente-lista.html
++++ b/src/main/resources/templates/cliente-lista.html
+@@ -40,7 +40,7 @@
+                 </div>
+             </div>
+
+-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
++            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+         </nav>
+     </aside>
+
+diff --git a/src/main/resources/templates/usuario-form.html b/src/main/resources/templates/usuario-form.html
+index 8c46fe5..5bc2a06 100644
+--- a/src/main/resources/templates/usuario-form.html
++++ b/src/main/resources/templates/usuario-form.html
+@@ -40,7 +40,7 @@
+                 </div>
+             </div>
+
+-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
++            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+         </nav>
+     </aside>
+
+diff --git a/src/main/resources/templates/usuario-lista.html b/src/main/resources/templates/usuario-lista.html
+index 229d651..d98cd94 100644
+--- a/src/main/resources/templates/usuario-lista.html
++++ b/src/main/resources/templates/usuario-lista.html
+@@ -40,7 +40,7 @@
+                 </div>
+             </div>
+
+-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
++            <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
+         </nav>
+     </aside>

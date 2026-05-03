@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>CIDADES CADASTRADAS</title>
@@ -8,46 +10,101 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script th:src="@{/js/sistema.js}" defer></script>
 </head>
+
 <body>
 
 <div class="layout">
     <aside class="sidebar">
         <div class="sidebar-logo">
-            <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro">
+            <img class="logo-imagem" th:src="@{/img/logo.png}" alt="Logo OrdemPro">
         </div>
 
         <nav class="sidebar-menu">
-            <div class="menu-group">
+
+            <a class="sidebar-link home-link" th:href="@{/ordens}">
+                <i class="bi bi-house-door-fill"></i>
+                HOME
+            </a>
+
+            <div class="menu-group" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
                 <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    <i class="bi bi-person-plus-fill"></i>
                     CADASTRO
                 </button>
 
-                <div id="submenu-cadastro" class="submenu aberto">
-                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
-                    <a class="submenu-link active" th:href="@{/cidades}">CIDADE</a>
-                    <a class="submenu-link" th:href="@{/usuarios}">USUÁRIO</a>
+                <div id="submenu-cadastro" class="submenu">
+                    <a class="submenu-link" th:href="@{/clientes}">
+                        <i class="bi bi-person-vcard"></i>
+                        CLIENTE
+                    </a>
+
+                    <a class="submenu-link active" th:href="@{/cidades}">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        CIDADE
+                    </a>
+
+                    <a class="submenu-link"
+                       sec:authorize="hasRole('ADMIN')"
+                       th:href="@{/usuarios}">
+                        <i class="bi bi-person-gear"></i>
+                        USUÁRIO
+                    </a>
                 </div>
             </div>
 
             <div class="menu-group">
                 <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                    <i class="bi bi-clipboard-check-fill"></i>
                     ORDENS DE SERVIÇO
                 </button>
 
                 <div id="submenu-ordens" class="submenu">
-                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
-                    <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
+                    <a class="submenu-link" th:href="@{/ordens}">
+                        <i class="bi bi-search"></i>
+                        BUSCA
+                    </a>
+
+                    <a class="submenu-link" th:href="@{/ordens/nova}">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        NOVA
+                    </a>
                 </div>
             </div>
 
-            <a class="sidebar-link sair-link" th:href="@{/login}">SAIR</a>
+            <a class="sidebar-link sair-link" th:href="@{/logout}">
+                <i class="bi bi-box-arrow-right"></i>
+                SAIR
+            </a>
+
         </nav>
+
+        <div class="sidebar-user-card">
+            <div class="sidebar-user-info">
+                <i class="bi bi-person-circle"></i>
+
+                <div>
+                    <span class="sidebar-user-name"
+                          th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                        USUÁRIO • PERFIL
+                    </span>
+
+                    <span class="sidebar-user-profile">
+                        Perfil:
+                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <main class="main-content">
         <section class="content-card">
+
             <div class="page-header">
-                <h1 class="page-title">CIDADES CADASTRADAS</h1>
+
+                <div>
+                    <h1 class="page-title">CIDADES CADASTRADAS</h1>
+                </div>
 
                 <a class="primary-button" th:href="@{/cidades/nova}">
                     <i class="bi bi-plus-circle"></i>
@@ -68,13 +125,13 @@
             <form class="filtro-form" method="get" th:action="@{/cidades}">
                 <div class="form-group">
                     <label class="form-label" for="filtro">BUSCA</label>
-                    <input
-                            class="form-input"
-                            type="text"
-                            id="filtro"
-                            name="filtro"
-                            placeholder="BUSQUE POR NOME OU UF"
-                            th:value="${filtroSelecionado}">
+
+                    <input class="form-input"
+                           type="text"
+                           id="filtro"
+                           name="filtro"
+                           placeholder="BUSQUE POR NOME OU UF"
+                           th:value="${filtroSelecionado}">
                 </div>
 
                 <div class="filtro-acoes">
@@ -108,13 +165,14 @@
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(cidades)}">
-                        <td colspan="4" class="empty-message">
+                        <td colspan="3" class="empty-message">
                             NENHUMA CIDADE ENCONTRADA.
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
+
         </section>
     </main>
 </div>

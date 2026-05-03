@@ -11,6 +11,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "clientes")
 @Getter
@@ -24,7 +26,9 @@ public class Cliente {
     private String nome;
     private String cpf;
     private String rg;
+    private LocalDate dataNascimento;
     private String telefone;
+    private String celular;
     private String email;
     private String endereco;
     private String numero;

@@ -45,11 +45,16 @@ public class SecurityConfig {
                         // VENDEDOR NÃO pode editar ou excluir cliente
                         .requestMatchers(
                                 "/clientes/editar/**",
-                                "/clientes/atualizar/**",
                                 "/clientes/excluir/**"
                         ).hasAnyRole("ADMIN", "GERENTE")
 
-                        // ADMIN, GERENTE e VENDEDOR podem cadastrar e buscar clientes
+                        // ADMIN e GERENTE podem cadastrar clientes livremente
+                        .requestMatchers(
+                                "/clientes/novo",
+                                "/clientes/salvar"
+                        ).hasAnyRole("ADMIN", "GERENTE", "VENDEDOR")
+
+                        // ADMIN, GERENTE e VENDEDOR podem buscar clientes
                         .requestMatchers(
                                 "/clientes",
                                 "/clientes/**"
@@ -58,7 +63,6 @@ public class SecurityConfig {
                         // ADMIN e GERENTE podem editar, atualizar e cancelar ordens
                         .requestMatchers(
                                 "/ordens/editar/**",
-                                "/ordens/atualizar/**",
                                 "/ordens/cancelar/**"
                         ).hasAnyRole("ADMIN", "GERENTE")
 

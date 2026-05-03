@@ -31,6 +31,7 @@ public class ClienteController {
         model.addAttribute("clientes", clienteService.buscarComFiltro(filtro));
         model.addAttribute("filtroSelecionado", filtro);
         model.addAttribute("origem", origem);
+
         return "cliente-lista";
     }
 
@@ -42,6 +43,7 @@ public class ClienteController {
         model.addAttribute("cliente", new Cliente());
         model.addAttribute("cidades", cidadeService.listarTodas());
         model.addAttribute("origem", origem);
+
         return "cliente-form";
     }
 
@@ -62,6 +64,7 @@ public class ClienteController {
         model.addAttribute("cliente", cliente);
         model.addAttribute("cidades", cidadeService.listarTodas());
         model.addAttribute("origem", origem);
+
         return "cliente-form";
     }
 

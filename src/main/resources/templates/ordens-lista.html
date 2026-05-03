@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/sistema.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
+
 <body>
 
 <div class="layout">
@@ -23,22 +24,34 @@
 
         <nav class="sidebar-menu">
 
-            <a class="sidebar-link home-link" th:href="@{/ordens}">
+            <a class="sidebar-link home-link active" th:href="@{/ordens}">
+                <i class="bi bi-house-door-fill"></i>
                 HOME
             </a>
 
-            <div class="menu-group" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
-                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+            <div class="menu-group" sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')">
+                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-cadastro')">
+                    <i class="bi bi-person-plus-fill"></i>
                     CADASTRO
                 </button>
 
                 <div id="submenu-cadastro" class="submenu">
-                    <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
-                    <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
+                    <a class="submenu-link" th:href="@{/clientes}">
+                        <i class="bi bi-person-vcard"></i>
+                        CLIENTE
+                    </a>
+
+                    <a class="submenu-link"
+                       sec:authorize="hasAnyRole('ADMIN', 'GERENTE')"
+                       th:href="@{/cidades}">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        CIDADE
+                    </a>
 
                     <a class="submenu-link"
                        sec:authorize="hasRole('ADMIN')"
                        th:href="@{/usuarios}">
+                        <i class="bi bi-person-gear"></i>
                         USUÁRIO
                     </a>
                 </div>
@@ -46,26 +59,55 @@
 
             <div class="menu-group">
                 <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-ordens')">
+                    <i class="bi bi-clipboard-check-fill"></i>
                     ORDENS DE SERVIÇO
                 </button>
 
-                <div id="submenu-ordens" class="submenu aberto">
-                    <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
-                    <a class="submenu-link active" th:href="@{/ordens/nova}">NOVA</a>
+                <div id="submenu-ordens" class="submenu">
+                    <a class="submenu-link active" th:href="@{/ordens}">
+                        <i class="bi bi-search"></i>
+                        BUSCA
+                    </a>
+
+                    <a class="submenu-link" th:href="@{/ordens/nova}">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        NOVA
+                    </a>
                 </div>
             </div>
 
             <a class="sidebar-link sair-link" th:href="@{/logout}">
+                <i class="bi bi-box-arrow-right"></i>
                 SAIR
             </a>
 
         </nav>
 
+        <div class="sidebar-user-card">
+            <div class="sidebar-user-info">
+                <i class="bi bi-person-circle"></i>
+
+                <div>
+                    <span class="sidebar-user-name"
+                          th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                        USUÁRIO • PERFIL
+                    </span>
+
+                    <span class="sidebar-user-profile">
+                        Perfil:
+                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+
     </aside>
 
     <main class="main-content">
         <section class="content-card">
+
             <div class="page-header">
+
                 <div>
                     <h1 class="page-title">ORDENS DE SERVIÇO</h1>
                     <p class="page-subtitle">VISUALIZAÇÃO DAS ÚLTIMAS 5 ORDENS CADASTRADAS OU RESULTADO DOS FILTROS</p>
@@ -102,6 +144,7 @@
 
             <form method="get" th:action="@{/ordens}" class="filtro-form">
                 <div class="filtro-grid">
+
                     <div class="form-group">
                         <label class="form-label" for="status">STATUS</label>
                         <select class="form-select" id="status" name="status">
@@ -135,6 +178,7 @@
 
                     <div class="form-group filtro-botoes">
                         <label class="form-label label-invisivel">AÇÃO</label>
+
                         <div class="filtro-acoes">
                             <button type="submit" class="primary-button">
                                 <i class="bi bi-search"></i>
@@ -150,8 +194,8 @@
                 </div>
             </form>
 
-            <div class="table-container">
-                <table class="data-table">
+            <div class="table-container ordens-table-container">
+                <table class="data-table ordens-table">
                     <thead>
                     <tr>
                         <th>ID</th>
@@ -165,18 +209,75 @@
                     </thead>
 
                     <tbody>
-                    <tr th:each="ordem : ${ordens}">
-                        <td th:text="${ordem.idOs}"></td>
+                    <tr th:each="ordem : ${ordens}" class="ordem-card-row">
 
-                        <td>
+                        <td data-label="ID">
+                            <span th:text="${ordem.idOs}"></span>
+                        </td>
+
+                        <td data-label="CLIENTE" class="ordem-cliente-cell">
                             <button type="button"
                                     class="cliente-toggle"
+                                    th:if="${ordem.cliente != null}"
                                     th:attr="onclick=|alternarDetalhes('cliente-${ordem.idOs}')|">
                                 <span th:text="${ordem.cliente.nome}"></span>
                                 <i class="bi bi-chevron-down"></i>
                             </button>
 
+                            <span th:if="${ordem.cliente == null}">CLIENTE NÃO INFORMADO</span>
+
                             <div class="cliente-detalhes" th:id="|cliente-${ordem.idOs}|">
+
+                                <p>
+                                    <strong>CLIENTE:</strong>
+                                    <span th:text="${ordem.cliente != null ? ordem.cliente.nome : 'CLIENTE NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>CPF:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.cpf != null and !#strings.isEmpty(ordem.cliente.cpf) ? ordem.cliente.cpf : 'NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>TELEFONE:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.telefone != null and !#strings.isEmpty(ordem.cliente.telefone) ? ordem.cliente.telefone : 'NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>CELULAR:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.celular != null and !#strings.isEmpty(ordem.cliente.celular) ? ordem.cliente.celular : 'NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>E-MAIL:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.email != null and !#strings.isEmpty(ordem.cliente.email) ? ordem.cliente.email : 'NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>ENDEREÇO:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.endereco != null and !#strings.isEmpty(ordem.cliente.endereco) ? ordem.cliente.endereco : 'NÃO INFORMADO'}"></span>
+                                    <span th:if="${ordem.cliente != null and ordem.cliente.numero != null and !#strings.isEmpty(ordem.cliente.numero)}"
+                                          th:text="${', Nº ' + ordem.cliente.numero}">
+                                    </span>
+                                </p>
+
+                                <p>
+                                    <strong>BAIRRO:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.bairro != null and !#strings.isEmpty(ordem.cliente.bairro) ? ordem.cliente.bairro : 'NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>CEP:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.cep != null and !#strings.isEmpty(ordem.cliente.cep) ? ordem.cliente.cep : 'NÃO INFORMADO'}"></span>
+                                </p>
+
+                                <p>
+                                    <strong>CIDADE:</strong>
+                                    <span th:text="${ordem.cliente != null and ordem.cliente.cidade != null ? ordem.cliente.cidade.nome + ' - ' + ordem.cliente.cidade.uf : 'NÃO INFORMADA'}"></span>
+                                </p>
+
+                                <hr style="margin: 8px 0; border: none; border-top: 1px solid #dbe1e8;">
+
                                 <p>
                                     <strong>SERVIÇO:</strong>
                                     <span th:text="${ordemService.buscarDescricaoServico(ordem.idOs)}"></span>
@@ -189,7 +290,7 @@
 
                                 <p>
                                     <strong>DATA DE ABERTURA:</strong>
-                                    <span th:text="${#temporals.format(ordem.dataAbertura, 'dd/MM/yyyy')}"></span>
+                                    <span th:text="${ordem.dataAbertura != null ? #temporals.format(ordem.dataAbertura, 'dd/MM/yyyy') : 'NÃO INFORMADA'}"></span>
                                 </p>
 
                                 <p>
@@ -199,9 +300,11 @@
                             </div>
                         </td>
 
-                        <td th:text="${ordemService.buscarDescricaoServico(ordem.idOs)}"></td>
+                        <td data-label="SERVIÇO">
+                            <span th:text="${ordemService.buscarDescricaoServico(ordem.idOs)}"></span>
+                        </td>
 
-                        <td>
+                        <td data-label="STATUS">
                             <span class="status-badge"
                                   th:text="${ordem.status}"
                                   th:classappend="${
@@ -213,12 +316,17 @@
                             </span>
                         </td>
 
-                        <td th:text="${'R$ ' + #numbers.formatDecimal(ordem.valorTotal, 1, 'POINT', 2, 'COMMA')}"></td>
+                        <td data-label="VALOR TOTAL">
+                            <span th:text="${ordem.valorTotal != null ? 'R$ ' + #numbers.formatDecimal(ordem.valorTotal, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}"></span>
+                        </td>
 
-                        <td th:text="${#temporals.format(ordem.dataAbertura, 'dd/MM/yyyy')}"></td>
+                        <td data-label="DATA">
+                            <span th:text="${ordem.dataAbertura != null ? #temporals.format(ordem.dataAbertura, 'dd/MM/yyyy') : 'NÃO INFORMADA'}"></span>
+                        </td>
 
-                        <td>
+                        <td data-label="AÇÕES">
                             <div class="acoes-tabela">
+
                                 <a class="action-icon edit-icon"
                                    th:href="@{/ordens/editar/{id}(id=${ordem.idOs})}"
                                    title="EDITAR">
@@ -239,11 +347,13 @@
 
                                 <a sec:authorize="hasAnyRole('ADMIN', 'GERENTE')"
                                    th:if="${ordem.status != 'FINALIZADA' and ordem.status != 'CANCELADA'}"
+                                   class="action-icon delete-icon"
                                    th:href="@{/ordens/cancelar/{id}(id=${ordem.idOs})}"
-                                   class="btn btn-warning btn-sm"
-                                   onclick="return confirm('Deseja realmente cancelar esta ordem de serviço?')">
-                                    Cancelar Ordem
+                                   onclick="return confirm('Deseja realmente cancelar esta ordem de serviço?')"
+                                   title="CANCELAR ORDEM">
+                                    <i class="bi bi-x-circle-fill"></i>
                                 </a>
+
                             </div>
                         </td>
                     </tr>
@@ -256,6 +366,7 @@
                     </tbody>
                 </table>
             </div>
+
         </section>
     </main>
 </div>

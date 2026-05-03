@@ -1,10 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
     configurarBuscaCep();
     configurarMascaraTelefone();
+    configurarMascaraCelular();
     configurarMascaraCpf();
     configurarMascaraCep();
     configurarMascaraValor();
     configurarAutoExpandTextareas();
+    configurarCampoCidadeCliente();
+    configurarBuscaClienteModal();
+    preencherClienteSelecionadoNaEdicao();
+    configurarMenuMobile();
 });
 
 function alternarSubmenu(id) {
@@ -25,7 +30,6 @@ function alternarDetalhes(id) {
     });
 
     detalhesSelecionado.classList.toggle("aberto");
-
 }
 
 function toggleSenha() {
@@ -47,6 +51,20 @@ function configurarMascaraTelefone() {
     const camposTelefone = document.querySelectorAll("#telefone, input[name='telefone']");
 
     camposTelefone.forEach((campo) => {
+        campo.addEventListener("input", function () {
+            campo.value = aplicarMascaraTelefone(campo.value);
+        });
+
+        campo.addEventListener("blur", function () {
+            campo.value = aplicarMascaraTelefone(campo.value);
+        });
+    });
+}
+
+function configurarMascaraCelular() {
+    const camposCelular = document.querySelectorAll("#celular, input[name='celular']");
+
+    camposCelular.forEach((campo) => {
         campo.addEventListener("input", function () {
             campo.value = aplicarMascaraTelefone(campo.value);
         });
@@ -217,38 +235,6 @@ function preencherCamposEndereco(dados) {
     }
 }
 
-function selecionarCidadeNoCombo(localidade, uf) {
-    const selectCidade = document.getElementById("cidade");
-    if (!selectCidade) return;
-
-    const localidadeNormalizada = normalizarTexto(localidade);
-    const ufNormalizada = normalizarTexto(uf);
-
-    let encontrou = false;
-
-    for (let i = 0; i < selectCidade.options.length; i++) {
-        const option = selectCidade.options[i];
-        const textoOption = normalizarTexto(option.text);
-
-        const bateCidade =
-            textoOption === `${localidadeNormalizada} - ${ufNormalizada}` ||
-            textoOption === localidadeNormalizada ||
-            textoOption.includes(`${localidadeNormalizada} - ${ufNormalizada}`) ||
-            textoOption.includes(localidadeNormalizada);
-
-        if (bateCidade) {
-            selectCidade.selectedIndex = i;
-            encontrou = true;
-            break;
-        }
-    }
-
-    if (!encontrou) {
-        console.warn(`Cidade não encontrada no select: ${localidade}/${uf}`);
-        alert(`CEP localizado, mas a cidade ${localidade}/${uf} não foi encontrada na lista. Selecione manualmente.`);
-    }
-}
-
 function normalizarTexto(texto) {
     if (!texto) return "";
 
@@ -259,6 +245,242 @@ function normalizarTexto(texto) {
         .trim()
         .toUpperCase();
 }
+
+function normalizarTextoParaBusca(texto) {
+    return normalizarTexto(texto).replace(/\D/g, "") + " " + normalizarTexto(texto);
+}
+
+/* ===== CIDADE EM CAMPO ÚNICO ===== */
+
+function configurarCampoCidadeCliente() {
+    preencherBuscaCidadeSelecionada();
+
+    const campoBusca = document.getElementById("cidadeBusca");
+
+    if (!campoBusca) {
+        return;
+    }
+
+    campoBusca.addEventListener("input", selecionarCidadePeloNome);
+    campoBusca.addEventListener("change", selecionarCidadePeloNome);
+
+    campoBusca.addEventListener("blur", function () {
+        selecionarPrimeiraCidadeEncontrada();
+    });
+
+    campoBusca.addEventListener("keydown", function (evento) {
+        if (evento.key === "Enter") {
+            evento.preventDefault();
+            selecionarPrimeiraCidadeEncontrada();
+        }
+    });
+}
+
+function selecionarCidadeNoCombo(localidade, uf) {
+    const campoBusca = document.getElementById("cidadeBusca");
+    const campoCidadeId = document.getElementById("cidade");
+    const campoUf = document.getElementById("ufCliente");
+    const listaCidades = document.getElementById("listaCidades");
+
+    if (!campoBusca || !campoCidadeId || !campoUf || !listaCidades) return;
+
+    const localidadeNormalizada = normalizarTexto(localidade);
+    const ufNormalizada = normalizarTexto(uf);
+    const opcoes = Array.from(listaCidades.options);
+
+    const cidadeEncontrada = opcoes.find((opcao) => {
+        const nomeCidadeNormalizado = normalizarTexto(opcao.value);
+        const ufCidadeNormalizada = normalizarTexto(opcao.getAttribute("data-uf"));
+
+        return nomeCidadeNormalizado === localidadeNormalizada &&
+            ufCidadeNormalizada === ufNormalizada;
+    });
+
+    if (!cidadeEncontrada) {
+        campoCidadeId.value = "";
+        campoUf.value = "";
+        alert(`CEP localizado, mas a cidade ${localidade}/${uf} não foi encontrada na lista. Digite manualmente.`);
+        return;
+    }
+
+    campoBusca.value = cidadeEncontrada.value;
+    campoCidadeId.value = cidadeEncontrada.getAttribute("data-id") || "";
+    campoUf.value = cidadeEncontrada.getAttribute("data-uf") || "";
+}
+
+function atualizarUfCliente() {
+    selecionarCidadePeloNome();
+}
+
+function selecionarCidadePeloNome() {
+    const campoBusca = document.getElementById("cidadeBusca");
+    const campoCidadeId = document.getElementById("cidade");
+    const campoUf = document.getElementById("ufCliente");
+    const listaCidades = document.getElementById("listaCidades");
+
+    if (!campoBusca || !campoCidadeId || !campoUf || !listaCidades) return;
+
+    const textoDigitado = normalizarTexto(campoBusca.value);
+    const opcoes = Array.from(listaCidades.options);
+
+    const cidadeExata = opcoes.find((opcao) => {
+        return normalizarTexto(opcao.value) === textoDigitado;
+    });
+
+    if (cidadeExata) {
+        campoCidadeId.value = cidadeExata.getAttribute("data-id") || "";
+        campoUf.value = cidadeExata.getAttribute("data-uf") || "";
+        return;
+    }
+
+    campoCidadeId.value = "";
+    campoUf.value = "";
+}
+
+function selecionarPrimeiraCidadeEncontrada() {
+    const campoBusca = document.getElementById("cidadeBusca");
+    const campoCidadeId = document.getElementById("cidade");
+    const campoUf = document.getElementById("ufCliente");
+    const listaCidades = document.getElementById("listaCidades");
+
+    if (!campoBusca || !campoCidadeId || !campoUf || !listaCidades) return;
+
+    const textoDigitado = normalizarTexto(campoBusca.value);
+
+    if (!textoDigitado) {
+        campoCidadeId.value = "";
+        campoUf.value = "";
+        return;
+    }
+
+    const opcoes = Array.from(listaCidades.options);
+
+    const cidadeEncontrada = opcoes.find((opcao) => {
+        return normalizarTexto(opcao.value).startsWith(textoDigitado);
+    });
+
+    if (!cidadeEncontrada) {
+        campoCidadeId.value = "";
+        campoUf.value = "";
+        return;
+    }
+
+    campoBusca.value = cidadeEncontrada.value;
+    campoCidadeId.value = cidadeEncontrada.getAttribute("data-id") || "";
+    campoUf.value = cidadeEncontrada.getAttribute("data-uf") || "";
+}
+
+function preencherBuscaCidadeSelecionada() {
+    const campoBusca = document.getElementById("cidadeBusca");
+    const campoCidadeId = document.getElementById("cidade");
+    const campoUf = document.getElementById("ufCliente");
+    const listaCidades = document.getElementById("listaCidades");
+
+    if (!campoBusca || !campoCidadeId || !campoUf || !listaCidades || !campoCidadeId.value) {
+        return;
+    }
+
+    const opcoes = Array.from(listaCidades.options);
+
+    const cidadeSelecionada = opcoes.find((opcao) => {
+        return opcao.getAttribute("data-id") === campoCidadeId.value;
+    });
+
+    if (!cidadeSelecionada) return;
+
+    campoBusca.value = cidadeSelecionada.value;
+    campoUf.value = cidadeSelecionada.getAttribute("data-uf") || "";
+}
+
+/* ===== BUSCA DE CLIENTE NO MODAL DA ORDEM ===== */
+
+function configurarBuscaClienteModal() {
+    const campoBusca = document.getElementById("buscaClienteModal");
+
+    if (!campoBusca) {
+        return;
+    }
+
+    esconderTodosClientesModal();
+
+    campoBusca.addEventListener("keydown", buscarClientesModalPorEnter);
+}
+
+function buscarClientesModalPorEnter(evento) {
+    if (evento.key !== "Enter") {
+        return;
+    }
+
+    evento.preventDefault();
+    filtrarClientesModal();
+}
+
+function filtrarClientesModal() {
+    const inputFiltro =
+        document.getElementById("buscaClienteModal") ||
+        document.getElementById("filtroClienteModal");
+
+    const linhas = document.querySelectorAll(".linha-cliente-modal");
+    const linhaNenhumResultado = document.getElementById("linhaNenhumClienteEncontrado");
+    const mensagem = document.getElementById("mensagemBuscaClienteModal");
+
+    if (!inputFiltro || !linhas.length) {
+        return;
+    }
+
+    const termoDigitado = inputFiltro.value.trim();
+
+    if (!termoDigitado) {
+        esconderTodosClientesModal();
+
+        if (linhaNenhumResultado) {
+            linhaNenhumResultado.style.display = "none";
+        }
+
+        if (mensagem) {
+            mensagem.textContent = "DIGITE O TERMO DE BUSCA E APERTE ENTER.";
+        }
+
+        return;
+    }
+
+    const termoNormalizado = normalizarTexto(termoDigitado);
+    const numerosDigitados = termoDigitado.replace(/\D/g, "");
+    let totalEncontrado = 0;
+
+    linhas.forEach((linha) => {
+        const textoBusca = linha.getAttribute("data-busca") || "";
+        const textoNormalizado = normalizarTexto(textoBusca);
+        const numerosLinha = textoBusca.replace(/\D/g, "");
+
+        const encontrouPorTexto = textoNormalizado.includes(termoNormalizado);
+        const encontrouPorNumero = numerosDigitados.length > 0 && numerosLinha.includes(numerosDigitados);
+
+        if (encontrouPorTexto || encontrouPorNumero) {
+            linha.style.display = "";
+            totalEncontrado++;
+        } else {
+            linha.style.display = "none";
+        }
+    });
+
+    if (linhaNenhumResultado) {
+        linhaNenhumResultado.style.display = totalEncontrado === 0 ? "" : "none";
+    }
+
+    if (mensagem) {
+        mensagem.textContent = totalEncontrado === 1
+            ? "1 CLIENTE ENCONTRADO."
+            : `${totalEncontrado} CLIENTES ENCONTRADOS.`;
+    }
+}
+
+function esconderTodosClientesModal() {
+    document.querySelectorAll(".linha-cliente-modal").forEach((linha) => {
+        linha.style.display = "none";
+    });
+}
+
 function configurarAutoExpandTextareas() {
     const textareas = document.querySelectorAll(".auto-expand");
 
@@ -275,6 +497,7 @@ function ajustarAlturaTextarea(textarea) {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 }
+
 function selecionarCliente(idCliente, nomeCliente) {
     const campoId = document.getElementById("idCliente");
     const campoNome = document.getElementById("nomeClienteSelecionado");
@@ -290,11 +513,30 @@ function selecionarCliente(idCliente, nomeCliente) {
 
     fecharModalClientes();
 }
+
 function abrirModalClientes() {
     const modal = document.getElementById("modalClientes");
+    const campoBusca = document.getElementById("buscaClienteModal");
+    const mensagem = document.getElementById("mensagemBuscaClienteModal");
+    const linhaNenhumResultado = document.getElementById("linhaNenhumClienteEncontrado");
 
     if (modal) {
         modal.classList.add("aberto");
+    }
+
+    esconderTodosClientesModal();
+
+    if (campoBusca) {
+        campoBusca.value = "";
+        setTimeout(() => campoBusca.focus(), 100);
+    }
+
+    if (mensagem) {
+        mensagem.textContent = "DIGITE O TERMO DE BUSCA E APERTE ENTER.";
+    }
+
+    if (linhaNenhumResultado) {
+        linhaNenhumResultado.style.display = "none";
     }
 }
 
@@ -306,16 +548,75 @@ function fecharModalClientes() {
     }
 }
 
-function filtrarClientesModal() {
-    const campoBusca = document.getElementById("buscaClienteModal");
-    const linhas = document.querySelectorAll(".linha-cliente-modal");
+function preencherClienteSelecionadoNaEdicao() {
+    const campoId = document.getElementById("idCliente");
+    const campoNome = document.getElementById("nomeClienteSelecionado");
 
-    if (!campoBusca) return;
+    if (!campoId || !campoNome || !campoId.value) return;
 
-    const filtro = campoBusca.value.toUpperCase();
+    const linhas = document.querySelectorAll("#tabelaClientesModal tbody tr, .linha-cliente-modal");
 
-    linhas.forEach(function (linha) {
-        const texto = (linha.getAttribute("data-busca") || "").toUpperCase();
-        linha.style.display = texto.includes(filtro) ? "" : "none";
+    for (const linha of linhas) {
+        const botaoSelecionar = linha.querySelector("button[onclick]");
+        const onclickLinha = linha.getAttribute("onclick") || "";
+        const onclickBotao = botaoSelecionar ? botaoSelecionar.getAttribute("onclick") || "" : "";
+        const conteudoOnclick = onclickLinha + " " + onclickBotao;
+
+        if (!conteudoOnclick.includes(`selecionarCliente(${campoId.value},`) &&
+            !conteudoOnclick.includes(`selecionarCliente('${campoId.value}',`)) {
+            continue;
+        }
+
+        const celulaNome = linha.querySelector("td:nth-child(2)") || linha.querySelector("td:first-child");
+
+        if (celulaNome && celulaNome.textContent.trim()) {
+            campoNome.value = celulaNome.textContent.trim();
+            campoNome.classList.add("cliente-selecionado");
+        }
+
+        break;
+    }
+}
+
+/* ===== MENU MOBILE HAMBURGUER - ORDEMPRO ===== */
+
+function configurarMenuMobile() {
+    const sidebar = document.querySelector(".sidebar");
+
+    if (!sidebar) {
+        return;
+    }
+
+    let botaoMobile = document.querySelector(".mobile-menu-button");
+
+    if (!botaoMobile) {
+        botaoMobile = document.createElement("button");
+        botaoMobile.type = "button";
+        botaoMobile.className = "mobile-menu-button";
+        botaoMobile.setAttribute("aria-label", "Abrir ou fechar menu");
+        botaoMobile.innerHTML = '<i class="bi bi-list"></i>';
+        document.body.prepend(botaoMobile);
+    }
+
+    botaoMobile.addEventListener("click", function () {
+        sidebar.classList.toggle("aberta");
+        document.body.classList.toggle("menu-mobile-aberto");
+    });
+
+    document.addEventListener("click", function (evento) {
+        const clicouNoMenu = sidebar.contains(evento.target);
+        const clicouNoBotao = botaoMobile.contains(evento.target);
+
+        if (!clicouNoMenu && !clicouNoBotao) {
+            sidebar.classList.remove("aberta");
+            document.body.classList.remove("menu-mobile-aberto");
+        }
+    });
+
+    sidebar.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+            sidebar.classList.remove("aberta");
+            document.body.classList.remove("menu-mobile-aberto");
+        });
     });
 }
