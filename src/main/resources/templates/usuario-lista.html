@@ -1,39 +1,110 @@
-<!DOCTYPE html> <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>USUÁRIOS</title>
+<!DOCTYPE html>
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USUÁRIOS</title>
+
     <link rel="stylesheet" th:href="@{/css/sistema.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-</head> <body> <div class="layout"> <aside class="sidebar"> <div class="sidebar-logo"> <img class="logo-imagem" src="/img/logo.png" alt="Logo OrdemPro"> </div>
-    <nav class="sidebar-menu">
-        <div class="menu-group">
-            <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
-                CADASTRO
-            </button>
+</head>
 
-            <div id="submenu-cadastro" class="submenu aberto">
-                <a class="submenu-link" th:href="@{/clientes}">CLIENTE</a>
-                <a class="submenu-link" th:href="@{/cidades}">CIDADE</a>
-                <a class="submenu-link active" th:href="@{/usuarios}">USUÁRIO</a>
-            </div>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img class="logo-imagem" th:src="@{/img/logo.png}" alt="Logo OrdemPro">
         </div>
 
-        <div class="menu-group">
-            <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
-                ORDENS DE SERVIÇO
-            </button>
+        <nav class="sidebar-menu">
 
-            <div id="submenu-ordens" class="submenu">
-                <a class="submenu-link" th:href="@{/ordens}">BUSCA</a>
-                <a class="submenu-link" th:href="@{/ordens/nova}">NOVA</a>
+            <a class="sidebar-link home-link" th:href="@{/ordens}">
+                <i class="bi bi-house-door-fill"></i>
+                HOME
+            </a>
+
+            <div class="menu-group" sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    <i class="bi bi-person-plus-fill"></i>
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu">
+                    <a class="submenu-link" th:href="@{/clientes}">
+                        <i class="bi bi-person-vcard"></i>
+                        CLIENTE
+                    </a>
+
+                    <a class="submenu-link" th:href="@{/cidades}">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        CIDADE
+                    </a>
+
+                    <a class="submenu-link active"
+                       sec:authorize="hasRole('ADMIN')"
+                       th:href="@{/usuarios}">
+                        <i class="bi bi-person-gear"></i>
+                        USUÁRIO
+                    </a>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu">
+                    <a class="submenu-link" th:href="@{/ordens}">
+                        <i class="bi bi-search"></i>
+                        BUSCA
+                    </a>
+
+                    <a class="submenu-link" th:href="@{/ordens/nova}">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        NOVA
+                    </a>
+                </div>
+            </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/logout}">
+                <i class="bi bi-box-arrow-right"></i>
+                SAIR
+            </a>
+
+        </nav>
+
+        <div class="sidebar-user-card">
+            <div class="sidebar-user-info">
+                <i class="bi bi-person-circle"></i>
+
+                <div>
+                    <span class="sidebar-user-name"
+                          th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                        USUÁRIO • PERFIL
+                    </span>
+
+                    <span class="sidebar-user-profile">
+                        Perfil:
+                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
+                    </span>
+                </div>
             </div>
         </div>
-
-        <a class="sidebar-link sair-link" th:href="@{/logout}">SAIR</a>
-    </nav>
-</aside>
+    </aside>
 
     <main class="main-content">
         <section class="content-card">
+
             <div class="page-header">
-                <h1 class="page-title">USUÁRIOS CADASTRADOS</h1>
+
+                <div>
+                    <h1 class="page-title">USUÁRIOS CADASTRADOS</h1>
+                </div>
 
                 <a class="primary-button" th:href="@{/usuarios/novo}">
                     <i class="bi bi-plus-circle"></i>
@@ -68,6 +139,7 @@
                         <td th:text="${usuario.ativo != null && usuario.ativo ? 'SIM' : 'NÃO'}"></td>
                         <td>
                             <div class="acoes-tabela">
+
                                 <a class="action-icon edit-icon"
                                    th:href="@{/usuarios/editar/{id}(id=${usuario.idUsuario})}"
                                    title="EDITAR">
@@ -86,8 +158,9 @@
                                       class="action-icon delete-icon"
                                       title="USUÁRIO LOGADO NÃO PODE SER EXCLUÍDO"
                                       style="opacity: 0.35; cursor: not-allowed;">
-                                <i class="bi bi-trash-fill"></i>
-                            </span>
+                                    <i class="bi bi-trash-fill"></i>
+                                </span>
+
                             </div>
                         </td>
                     </tr>
@@ -100,6 +173,11 @@
                     </tbody>
                 </table>
             </div>
+
         </section>
     </main>
-</div> <script th:src="@{/js/sistema.js}"></script> </body> </html>
+</div>
+
+<script th:src="@{/js/sistema.js}"></script>
+</body>
+</html>

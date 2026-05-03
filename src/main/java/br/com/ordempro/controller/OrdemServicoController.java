@@ -118,6 +118,7 @@ public class OrdemServicoController {
         if (camposObrigatoriosInvalidos(form)) {
             model.addAttribute("erro", "Preencha os campos obrigatórios: cliente e descrição.");
             model.addAttribute("modoEdicao", form.getIdOs() != null);
+            model.addAttribute("ordemForm", form);
             return carregarFormulario(model);
         }
 
@@ -128,6 +129,7 @@ public class OrdemServicoController {
         if (cliente == null || usuario == null) {
             model.addAttribute("erro", "Cliente ou usuário inválido.");
             model.addAttribute("modoEdicao", form.getIdOs() != null);
+            model.addAttribute("ordemForm", form);
             return carregarFormulario(model);
         }
 
@@ -138,6 +140,7 @@ public class OrdemServicoController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("erro", "Valor inválido. Digite no formato 0,00.");
             model.addAttribute("modoEdicao", form.getIdOs() != null);
+            model.addAttribute("ordemForm", form);
             return carregarFormulario(model);
         }
 
@@ -339,7 +342,9 @@ public class OrdemServicoController {
 
     private String carregarFormulario(Model model) {
         model.addAttribute("clientes", clienteService.listarTodos());
+        model.addAttribute("clientesModal", clienteService.listarTodos());
         model.addAttribute("servicos", servicoService.listarTodos());
+
         return "ordem-servico";
     }
 }
