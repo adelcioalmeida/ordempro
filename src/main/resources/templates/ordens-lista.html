@@ -84,21 +84,27 @@
         </nav>
 
         <div class="sidebar-user-card">
-            <div class="sidebar-user-info">
-                <i class="bi bi-person-circle"></i>
+            <button type="button"
+                    class="sidebar-user-button"
+                    onclick="abrirModalAlterarSenha()"
+                    title="Alterar minha senha">
+                <div class="sidebar-user-info">
+                    <i class="bi bi-person-circle"></i>
 
-                <div>
-                    <span class="sidebar-user-name"
-                          th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
-                        USUÁRIO • PERFIL
-                    </span>
+                    <div>
+                        <span class="sidebar-user-name"
+                              th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                            USUÁRIO • PERFIL
+                        </span>
 
-                    <span class="sidebar-user-profile">
-                        Perfil:
-                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
-                    </span>
+                        <span class="sidebar-user-profile">
+                            Clique para alterar senha
+                        </span>
+                    </div>
                 </div>
-            </div>
+
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
         </div>
 
     </aside>
@@ -119,8 +125,15 @@
                 </a>
             </div>
 
-            <div th:if="${sucesso}" class="alerta alerta-sucesso" th:text="${sucesso}"></div>
-            <div th:if="${erro}" class="alerta alerta-erro" th:text="${erro}"></div>
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
+
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
 
             <div class="resumo-cards">
                 <div class="resumo-card">
@@ -234,11 +247,6 @@
                                 </p>
 
                                 <p>
-                                    <strong>CPF:</strong>
-                                    <span th:text="${ordem.cliente != null and ordem.cliente.cpf != null and !#strings.isEmpty(ordem.cliente.cpf) ? ordem.cliente.cpf : 'NÃO INFORMADO'}"></span>
-                                </p>
-
-                                <p>
                                     <strong>TELEFONE:</strong>
                                     <span th:text="${ordem.cliente != null and ordem.cliente.telefone != null and !#strings.isEmpty(ordem.cliente.telefone) ? ordem.cliente.telefone : 'NÃO INFORMADO'}"></span>
                                 </p>
@@ -249,26 +257,16 @@
                                 </p>
 
                                 <p>
-                                    <strong>E-MAIL:</strong>
-                                    <span th:text="${ordem.cliente != null and ordem.cliente.email != null and !#strings.isEmpty(ordem.cliente.email) ? ordem.cliente.email : 'NÃO INFORMADO'}"></span>
-                                </p>
-
-                                <p>
                                     <strong>ENDEREÇO:</strong>
                                     <span th:text="${ordem.cliente != null and ordem.cliente.endereco != null and !#strings.isEmpty(ordem.cliente.endereco) ? ordem.cliente.endereco : 'NÃO INFORMADO'}"></span>
+
                                     <span th:if="${ordem.cliente != null and ordem.cliente.numero != null and !#strings.isEmpty(ordem.cliente.numero)}"
                                           th:text="${', Nº ' + ordem.cliente.numero}">
                                     </span>
-                                </p>
 
-                                <p>
-                                    <strong>BAIRRO:</strong>
-                                    <span th:text="${ordem.cliente != null and ordem.cliente.bairro != null and !#strings.isEmpty(ordem.cliente.bairro) ? ordem.cliente.bairro : 'NÃO INFORMADO'}"></span>
-                                </p>
-
-                                <p>
-                                    <strong>CEP:</strong>
-                                    <span th:text="${ordem.cliente != null and ordem.cliente.cep != null and !#strings.isEmpty(ordem.cliente.cep) ? ordem.cliente.cep : 'NÃO INFORMADO'}"></span>
+                                    <span th:if="${ordem.cliente != null and ordem.cliente.bairro != null and !#strings.isEmpty(ordem.cliente.bairro)}"
+                                          th:text="${' - ' + ordem.cliente.bairro}">
+                                    </span>
                                 </p>
 
                                 <p>
@@ -327,12 +325,15 @@
                         <td data-label="AÇÕES">
                             <div class="acoes-tabela">
 
-                                <a class="action-icon edit-icon"
+                                <a th:if="${usuarioLogadoPerfil == 'ADMIN'
+        or usuarioLogadoPerfil == 'GERENTE'
+        or (usuarioLogadoPerfil == 'VENDEDOR'
+            and (ordem.status == 'ABERTA' or ordem.status == 'aberta'))}"
+                                   class="action-icon edit-icon"
                                    th:href="@{/ordens/editar/{id}(id=${ordem.idOs})}"
-                                   title="EDITAR">
+                                   th:title="${usuarioLogadoPerfil == 'VENDEDOR' ? 'EDITAR ORDEM ABERTA' : 'EDITAR'}">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-
                                 <a class="action-icon pdf-icon"
                                    th:href="@{/ordens/pdf/{id}(id=${ordem.idOs})}"
                                    title="BAIXAR PDF">
@@ -370,6 +371,106 @@
         </section>
     </main>
 </div>
+
+<div id="modalAlterarSenha" class="modal-senha-overlay">
+    <div class="modal-senha-card">
+        <div class="modal-senha-header">
+            <h2>ALTERAR SENHA</h2>
+
+            <button type="button"
+                    class="modal-senha-fechar"
+                    onclick="fecharModalAlterarSenha()"
+                    aria-label="Fechar janela de alteração de senha">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <form th:action="@{/usuarios/alterar-senha}" method="post" class="modal-senha-form">
+            <div class="form-group">
+                <label class="form-label" for="senhaAtual">SENHA ATUAL</label>
+                <input class="form-input"
+                       type="password"
+                       id="senhaAtual"
+                       name="senhaAtual"
+                       placeholder="Digite sua senha atual"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="novaSenha">NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="novaSenha"
+                       name="novaSenha"
+                       minlength="6"
+                       placeholder="Digite a nova senha"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmacaoSenha">CONFIRMAR NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="confirmacaoSenha"
+                       name="confirmacaoSenha"
+                       minlength="6"
+                       placeholder="Confirme a nova senha"
+                       required>
+            </div>
+
+            <div class="modal-senha-actions">
+                <button type="submit" class="primary-button">
+                    <i class="bi bi-check-circle"></i>
+                    SALVAR SENHA
+                </button>
+
+                <button type="button"
+                        class="secondary-button"
+                        onclick="fecharModalAlterarSenha()">
+                    <i class="bi bi-x-circle"></i>
+                    CANCELAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.add('ativo');
+        }
+    }
+
+    function fecharModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.remove('ativo');
+        }
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            fecharModalAlterarSenha();
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        const modal = document.getElementById('modalAlterarSenha');
+        const card = document.querySelector('.modal-senha-card');
+
+        if (modal && card && modal.classList.contains('ativo')) {
+            const clicouForaDoCard = modal.contains(event.target) && !card.contains(event.target);
+
+            if (clicouForaDoCard) {
+                fecharModalAlterarSenha();
+            }
+        }
+    });
+</script>
 
 <script th:src="@{/js/sistema.js}"></script>
 </body>

@@ -1,15 +1,28 @@
+/* =========================================================
+   ORDEMPRO - SISTEMA.CSS LIMPO E ORGANIZADO
+   Mantém: sidebar, fundo claro, tabelas, formulários, modais,
+   permissões visuais, responsividade e campos de texto em modal.
+========================================================= */
+
+/* =========================
+   RESET / BASE
+========================= */
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+html,
 body {
     min-height: 100vh;
+}
+
+body {
     font-family: Arial, sans-serif;
-    background:
-        linear-gradient(rgba(15, 38, 56, 0.72), rgba(15, 38, 56, 0.88)),
-        url('/img/fundo-tecnologia.jpg') no-repeat center center fixed;
+    background: linear-gradient(135deg, #eef6fa 0%, #dcecf3 45%, #c9e0ea 100%);
+    background-attachment: fixed;
     background-size: cover;
     color: #1f2937;
 }
@@ -30,8 +43,8 @@ body {
     min-height: 100vh;
     background: linear-gradient(180deg, #EAF4F8 0%, #DCECF2 55%, #CFE3EC 100%);
     color: #123044;
-    padding: 28px 18px;
-    box-shadow: 4px 0 22px rgba(0, 0, 0, 0.18);
+    padding: 12px 18px 24px;
+    box-shadow: 4px 0 22px rgba(0, 0, 0, 0.14);
     display: flex;
     flex-direction: column;
 }
@@ -40,28 +53,30 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 42px;
-    padding: 18px 0;
+    min-height: 112px;
+    margin-bottom: 10px;
+    padding: 0 0 4px;
     background: transparent;
     border: none;
     box-shadow: none;
-    min-height: auto;
 }
 
 .logo-imagem,
 .sidebar-logo img,
 .logo-sidebar,
 .sidebar img {
-    max-width: 300px;
+    max-width: 245px;
     width: auto;
     height: auto;
-    filter: drop-shadow(0 3px 5px rgba(15, 48, 68, 0.22));
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 4px 6px rgba(15, 48, 68, 0.24));
 }
 
 .sidebar-menu {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 13px;
     width: 100%;
 }
 
@@ -78,18 +93,13 @@ body {
     width: 100%;
     border: none;
     border-radius: 13px;
-    padding: 14px 16px;
+    padding: 13px 15px;
     font-size: 0.95rem;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
     text-transform: uppercase;
     transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.menu-toggle,
-.sidebar-link,
-.submenu-link {
     display: flex;
     align-items: center;
     gap: 11px;
@@ -148,12 +158,11 @@ body {
     display: none;
     flex-direction: column;
     gap: 8px;
-    margin-top: 6px;
+    margin-top: 4px;
     margin-left: 8px;
-    padding: 10px;
+    padding: 8px;
     border-radius: 12px;
     background: rgba(18, 48, 68, 0.08);
-    box-shadow: none;
 }
 
 .menu-group:hover .submenu,
@@ -162,7 +171,6 @@ body {
 }
 
 .submenu-link {
-    display: flex;
     background: rgba(255, 255, 255, 0.62);
     color: #123044;
     border: 1px solid rgba(18, 48, 68, 0.08);
@@ -178,10 +186,13 @@ body {
     transform: translateX(3px);
 }
 
-/* usuário logado no rodapé da sidebar */
+/* =========================
+   USUÁRIO LOGADO NA SIDEBAR
+========================= */
+
 .sidebar-user-card {
     margin-top: auto;
-    padding-top: 22px;
+    padding-top: 18px;
     border-top: 1px solid rgba(18, 48, 68, 0.18);
 }
 
@@ -216,6 +227,34 @@ body {
     color: #2563EB;
 }
 
+.sidebar-user-button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0;
+}
+
+.sidebar-user-button:hover {
+    opacity: 0.92;
+}
+
+.sidebar-user-button:hover .sidebar-user-name {
+    text-decoration: underline;
+}
+
+.sidebar-user-button > i {
+    font-size: 1.25rem;
+    color: #2563EB;
+    flex-shrink: 0;
+}
+
 /* =========================
    CONTEÚDO PRINCIPAL
 ========================= */
@@ -224,6 +263,7 @@ body {
     flex: 1;
     min-width: 0;
     padding: 20px 22px;
+    overflow-x: hidden;
 }
 
 .content-card {
@@ -232,7 +272,8 @@ body {
     background-color: #f9fbfd;
     border-radius: 18px;
     padding: 24px;
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 16px 36px rgba(15, 48, 68, 0.16);
+    overflow-x: hidden;
 }
 
 .page-header {
@@ -259,16 +300,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-.usuario-logado {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: #274355;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-/* quando movermos o usuário para a sidebar, vamos esconder o usuário do topo */
+.usuario-logado,
 .usuario-logado.ocultar-topo {
     display: none !important;
 }
@@ -296,7 +328,7 @@ body {
 
 .primary-button {
     background-color: #2563EB;
-    color: #ffffff;
+    color: #FFFFFF;
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
 }
 
@@ -317,6 +349,36 @@ body {
    ALERTAS
 ========================= */
 
+.alert,
+.alerta,
+.alert-error,
+.alert-success {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    max-width: 620px;
+    margin: 14px 0 18px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.alert-success,
+.alerta-sucesso {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.alert-error,
+.alerta-erro {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
 .mensagem-sucesso {
     color: #15803d;
     font-weight: bold;
@@ -327,26 +389,6 @@ body {
     color: #b91c1c;
     font-weight: bold;
     margin-bottom: 16px;
-}
-
-.alerta {
-    padding: 14px 18px;
-    border-radius: 10px;
-    margin-bottom: 18px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.alerta-sucesso {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #86efac;
-}
-
-.alerta-erro {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fca5a5;
 }
 
 /* =========================
@@ -381,6 +423,7 @@ body {
     flex-direction: column;
     gap: 8px;
     margin-bottom: 10px;
+    min-width: 0;
 }
 
 .form-group-full {
@@ -402,19 +445,20 @@ body {
 .form-select,
 .form-textarea {
     width: 100%;
+    min-width: 0;
     padding: 12px 14px;
     border: 1px solid #cfd8e3;
     border-radius: 8px;
     outline: none;
     font-size: 0.95rem;
-    background-color: #ffffff;
+    background-color: #FFFFFF;
     color: #111827;
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-    border-color: #2563eb;
+    border-color: #2563EB;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
@@ -440,13 +484,62 @@ body {
 .filtro-form {
     margin-bottom: 24px;
     padding: 18px;
-    border: 1px solid #dbe1e8;
+    border: 1px solid #d4e1e8;
     border-radius: 12px;
-    background-color: #eef4f8;
+    background-color: #eef5f8;
 }
 
 .filtro-botoes {
     justify-content: flex-end;
+}
+
+/* =========================
+   DATAS
+========================= */
+
+input[type="date"],
+input[type="datetime-local"] {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    padding: 12px 14px;
+    border: 1px solid #cfd8e3;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+    background-color: #FFFFFF;
+    color: #111827;
+}
+
+input[type="date"]:focus,
+input[type="datetime-local"]:focus {
+    outline: none;
+    border-color: #2f6fed;
+    box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.18);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px;
+    filter: invert(18%) sepia(19%) saturate(844%) hue-rotate(174deg) brightness(92%) contrast(90%);
+    opacity: 0.9;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.data-input {
+    background: #FFFFFF;
+    color: #1f2d3d;
+}
+
+.campo-data-menor {
+    max-width: 280px;
 }
 
 /* =========================
@@ -460,13 +553,13 @@ body {
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #ffffff;
+    background-color: #FFFFFF;
     table-layout: auto;
 }
 
 .data-table th {
     background-color: #2b5b6f;
-    color: #ffffff;
+    color: #FFFFFF;
     text-align: left;
     padding: 14px 12px;
     font-size: 0.95rem;
@@ -499,7 +592,7 @@ body {
 }
 
 /* =========================
-   STATUS E AÇÕES
+   STATUS / AÇÕES
 ========================= */
 
 .status-badge {
@@ -609,11 +702,11 @@ body {
 }
 
 .cliente-selecionado {
-    border: 2px solid #16a34a !important;
+    border: 2px solid #16a34a;
 }
 
 /* =========================
-   SENHA
+   CAMPO SENHA / OLHO
 ========================= */
 
 .senha-wrapper {
@@ -625,7 +718,7 @@ body {
 .campo-senha {
     width: 100%;
     display: block;
-    padding-right: 52px !important;
+    padding-right: 52px;
 }
 
 .botao-olho {
@@ -635,11 +728,8 @@ body {
     transform: translateY(-50%);
     width: 32px;
     height: 32px;
-    margin: 0;
-    padding: 0;
     border: none;
     background: transparent;
-    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -649,17 +739,11 @@ body {
 }
 
 .botao-olho:hover {
-    color: #2563eb;
-}
-
-.botao-olho:focus {
-    outline: none;
-    box-shadow: none;
+    color: #2563EB;
 }
 
 .botao-olho i {
     font-size: 1.15rem;
-    line-height: 1;
     pointer-events: none;
 }
 
@@ -707,61 +791,14 @@ body {
 }
 
 /* =========================
-   DATA
-========================= */
-
-input[type="date"],
-input[type="datetime-local"] {
-    width: 100%;
-    background-color: #ffffff;
-    color: #1f2d3d;
-    border: 1px solid #9fb3c8;
-    border-radius: 12px;
-    padding: 12px 14px;
-    height: 46px;
-    box-sizing: border-box;
-}
-
-input[type="date"]:focus,
-input[type="datetime-local"]:focus {
-    outline: none;
-    border-color: #2f6fed;
-    box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.18);
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    border-radius: 6px;
-    padding: 4px;
-    filter: invert(18%) sepia(19%) saturate(844%) hue-rotate(174deg) brightness(92%) contrast(90%);
-    opacity: 0.9;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator:hover,
-input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-    transform: scale(1.05);
-}
-
-.data-input {
-    background: #ffffff !important;
-    color: #1f2d3d !important;
-}
-
-.campo-data-menor {
-    max-width: 280px;
-}
-
-/* =========================
-   MODAL CLIENTES
+   MODAIS GERAIS
 ========================= */
 
 .modal-clientes {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 99999;
+    z-index: 200000;
     background: rgba(15, 23, 42, 0.75);
     padding: 32px;
     overflow-y: auto;
@@ -784,42 +821,9 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     margin-top: 30px;
 }
 
-.modal-body input {
-    border: 2px solid #e5e7eb;
-    padding: 10px;
-    font-size: 14px;
-}
-
-.modal-body input:focus {
-    border-color: #2563eb;
-    outline: none;
-}
-
-.modal-body table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.modal-body th {
-    background: #2f5f6f;
-    color: white;
-    padding: 10px;
-    font-size: 13px;
-}
-
-.modal-body td {
-    padding: 10px;
-    border-bottom: 1px solid #eeeeee;
-}
-
-.modal-body tr:hover {
-    background: #f1f5f9;
-}
-
 .btn-selecionar {
-    background: #2563eb;
-    color: white;
+    background: #2563EB;
+    color: #FFFFFF;
     border: none;
     padding: 6px 12px;
     border-radius: 6px;
@@ -828,7 +832,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .btn-selecionar:hover {
-    background: #1d4ed8;
+    background: #1D4ED8;
 }
 
 .btn-cadastrar {
@@ -844,106 +848,185 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* =========================
-   CLIENTE FORM
+   MODAL ALTERAR SENHA
 ========================= */
 
-.cliente-form-grid {
-    display: grid !important;
-    grid-template-columns: 1.55fr 0.8fr 0.85fr 0.9fr 1.05fr 0.55fr !important;
-    gap: 14px 18px !important;
+.modal-senha-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.58);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 210000;
+    padding: 16px;
+}
+
+.modal-senha-overlay.ativo {
+    display: flex;
+}
+
+.modal-senha-card {
+    width: 100%;
+    max-width: 430px;
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+}
+
+.modal-senha-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.modal-senha-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111827;
+    text-transform: uppercase;
+}
+
+.modal-senha-fechar {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #111827;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-senha-fechar:hover {
+    color: #dc2626;
+}
+
+.modal-senha-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modal-senha-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.modal-senha-actions .primary-button,
+.modal-senha-actions .secondary-button {
+    width: auto;
+}
+
+/* =========================
+   MODAL TEXTO DA ORDEM
+========================= */
+
+.modal-texto-ordem-card {
+    width: min(850px, 100%);
+}
+
+#editorTextoOrdem {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* =========================
+   FORMULÁRIO DE CLIENTE
+========================= */
+
+.cliente-form-grid,
+.cliente-form-grid-ajustado {
+    display: grid;
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+    gap: 14px;
     align-items: end;
+    width: 100%;
 }
 
 .cliente-form-grid .campo-nome-ajustado,
-.cliente-form-grid .campo-email-ajustado,
-.cliente-form-grid .campo-cidade-maior,
-.cliente-form-grid .campo-endereco-maior,
-.cliente-form-grid .campo-bairro-ajustado,
+.cliente-form-grid-ajustado .campo-nome-ajustado {
+    grid-column: span 4;
+}
+
 .cliente-form-grid .campo-cpf-menor,
+.cliente-form-grid-ajustado .campo-cpf-menor {
+    grid-column: span 2;
+}
+
 .cliente-form-grid .campo-data-nascimento,
+.cliente-form-grid-ajustado .campo-data-nascimento {
+    grid-column: span 2;
+}
+
 .cliente-form-grid .campo-telefone-menor,
+.cliente-form-grid-ajustado .campo-telefone-menor {
+    grid-column: span 2;
+}
+
 .cliente-form-grid .campo-celular-maior,
+.cliente-form-grid-ajustado .campo-celular-maior {
+    grid-column: span 2;
+}
+
+.cliente-form-grid .campo-email-ajustado,
+.cliente-form-grid-ajustado .campo-email-ajustado {
+    grid-column: span 3;
+}
+
 .cliente-form-grid .campo-cep-menor,
+.cliente-form-grid-ajustado .campo-cep-menor {
+    grid-column: span 2;
+}
+
+.cliente-form-grid .campo-cidade-maior,
+.cliente-form-grid-ajustado .campo-cidade-maior {
+    grid-column: span 2;
+}
+
+.cliente-form-grid .campo-uf-menor,
+.cliente-form-grid-ajustado .campo-uf-menor {
+    grid-column: span 1;
+}
+
+.cliente-form-grid .campo-endereco-maior,
+.cliente-form-grid-ajustado .campo-endereco-maior {
+    grid-column: span 3;
+}
+
 .cliente-form-grid .campo-numero-menor,
-.cliente-form-grid .campo-uf-menor {
-    grid-column: span 1 !important;
-    min-width: 0 !important;
+.cliente-form-grid-ajustado .campo-numero-menor {
+    grid-column: span 1;
 }
 
-.campo-nome-ajustado {
-    max-width: 560px !important;
+.cliente-form-grid .campo-bairro-ajustado,
+.cliente-form-grid-ajustado .campo-bairro-ajustado {
+    grid-column: span 3;
 }
 
-.campo-email-ajustado {
-    max-width: 360px !important;
-}
-
-.campo-bairro-ajustado {
-    max-width: 360px !important;
-}
-
-.campo-endereco-maior {
-    max-width: 430px !important;
-}
-
-.campo-cidade-maior {
-    max-width: 210px !important;
-}
-
-.campo-uf-menor {
-    max-width: 95px !important;
-}
-
-.campo-numero-menor {
-    max-width: 115px !important;
-}
-
-.campo-celular-maior {
-    max-width: 260px !important;
-}
-
-.campo-telefone-menor {
-    max-width: 225px !important;
-}
-
-.campo-cpf-menor {
-    max-width: 210px !important;
-}
-
-.campo-data-nascimento {
-    max-width: 210px !important;
-}
-
-.campo-cep-menor {
-    max-width: 170px !important;
-}
-
-#ufCliente {
-    max-width: 90px !important;
-    text-align: center;
-}
-
-input[name="numero"] {
-    max-width: 115px !important;
-}
-
-input[name="telefone"] {
-    max-width: 225px !important;
-}
-
-input[name="celular"] {
-    max-width: 260px !important;
-}
-
-input[name="cep"] {
-    max-width: 170px !important;
-}
-
-#cidadeBusca {
+.cliente-form-grid .form-input,
+.cliente-form-grid .form-select,
+.cliente-form-grid input,
+.cliente-form-grid #cidadeBusca,
+.cliente-form-grid #ufCliente,
+.cliente-form-grid-ajustado .form-input,
+.cliente-form-grid-ajustado .form-select,
+.cliente-form-grid-ajustado input,
+.cliente-form-grid-ajustado #cidadeBusca,
+.cliente-form-grid-ajustado #ufCliente {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
+
 /* =========================
-   ORDEM DE SERVIÇO FORM
+   FORMULÁRIO DE ORDEM
 ========================= */
 
 .ordem-content-card {
@@ -991,17 +1074,14 @@ input[name="cep"] {
 
 .ordem-form-card .campo-valor {
     grid-area: valor;
-    max-width: none;
 }
 
 .ordem-form-card .campo-data-abertura {
     grid-area: dataAbertura;
-    max-width: none;
 }
 
 .ordem-form-card .campo-data-previsao {
     grid-area: previsao;
-    max-width: none;
 }
 
 .ordem-form-card .campo-descricao-servico {
@@ -1031,12 +1111,70 @@ input[name="cep"] {
 
 .campo-descricao-servico textarea,
 .campo-observacao textarea {
-    min-height: 112px;
-    resize: vertical;
+    height: 46px;
+    min-height: 46px;
 }
 
-.ordem-form-actions {
+.campo-texto-modal {
+    height: 46px;
+    min-height: 46px;
+    max-height: 46px;
+    padding: 12px 14px;
+    border: 1px solid #cfd8e3;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+    resize: none;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #FFFFFF;
+    color: #111827;
+    line-height: 1.35;
+}
+
+.campo-texto-modal:focus {
+    cursor: text;
+}
+
+.ordem-form-actions,
+.filtro-acoes.ordem-form-actions{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
     margin-top: 34px;
+}
+
+.ordem-form-actions .primary-button,
+.ordem-form-actions .secondary-button,
+.filtro-acoes.ordem-form-actions .primary-button,
+.filtro-acoes.ordem-form-actions .secondary-button {
+    width: auto;
+    min-width: 145px;
+
+}
+/* =========================
+   TELA DE USUÁRIOS
+========================= */
+
+.usuario-content-card {
+    min-height: auto;
+    padding-bottom: 26px;
+}
+
+.usuario-resumo-cards {
+    margin-bottom: 18px;
+}
+
+.usuario-table-container {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 22px rgba(15, 48, 68, 0.08);
+}
+
+.usuario-table-container .data-table {
+    margin-bottom: 0;
 }
 
 /* =========================
@@ -1048,7 +1186,7 @@ input[name="cep"] {
 }
 
 /* =========================
-   RESPONSIVO NOTEBOOK / TELAS MÉDIAS
+   RESPONSIVO - TELAS MÉDIAS
 ========================= */
 
 @media (max-width: 1400px) {
@@ -1060,10 +1198,66 @@ input[name="cep"] {
     .ordem-form-card .ordem-grid {
         gap: 28px 20px;
     }
+
+    .cliente-form-grid,
+    .cliente-form-grid-ajustado {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .cliente-form-grid .campo-nome-ajustado,
+    .cliente-form-grid-ajustado .campo-nome-ajustado {
+        grid-column: span 4;
+    }
+
+    .cliente-form-grid .campo-cpf-menor,
+    .cliente-form-grid .campo-data-nascimento,
+    .cliente-form-grid .campo-telefone-menor,
+    .cliente-form-grid .campo-celular-maior,
+    .cliente-form-grid-ajustado .campo-cpf-menor,
+    .cliente-form-grid-ajustado .campo-data-nascimento,
+    .cliente-form-grid-ajustado .campo-telefone-menor,
+    .cliente-form-grid-ajustado .campo-celular-maior {
+        grid-column: span 2;
+    }
+
+    .cliente-form-grid .campo-email-ajustado,
+    .cliente-form-grid-ajustado .campo-email-ajustado {
+        grid-column: span 4;
+    }
+
+    .cliente-form-grid .campo-cep-menor,
+    .cliente-form-grid-ajustado .campo-cep-menor {
+        grid-column: span 2;
+    }
+
+    .cliente-form-grid .campo-cidade-maior,
+    .cliente-form-grid-ajustado .campo-cidade-maior {
+        grid-column: span 3;
+    }
+
+    .cliente-form-grid .campo-uf-menor,
+    .cliente-form-grid-ajustado .campo-uf-menor {
+        grid-column: span 1;
+    }
+
+    .cliente-form-grid .campo-endereco-maior,
+    .cliente-form-grid-ajustado .campo-endereco-maior {
+        grid-column: span 3;
+    }
+
+    .cliente-form-grid .campo-numero-menor,
+    .cliente-form-grid-ajustado .campo-numero-menor {
+        grid-column: span 1;
+    }
+
+    .cliente-form-grid .campo-bairro-ajustado,
+    .cliente-form-grid-ajustado .campo-bairro-ajustado {
+        grid-column: span 2;
+    }
 }
 
 /* =========================
-   RESPONSIVO TABLET
+   RESPONSIVO - TABLET
 ========================= */
 
 @media (max-width: 1200px) {
@@ -1071,8 +1265,36 @@ input[name="cep"] {
         grid-template-columns: repeat(2, minmax(220px, 1fr));
     }
 
-    .cliente-form-grid {
-        grid-template-columns: repeat(3, minmax(180px, 1fr)) !important;
+    .cliente-form-grid,
+    .cliente-form-grid-ajustado {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+
+    .cliente-form-grid .campo-nome-ajustado,
+    .cliente-form-grid .campo-cpf-menor,
+    .cliente-form-grid .campo-data-nascimento,
+    .cliente-form-grid .campo-telefone-menor,
+    .cliente-form-grid .campo-celular-maior,
+    .cliente-form-grid .campo-email-ajustado,
+    .cliente-form-grid .campo-cep-menor,
+    .cliente-form-grid .campo-cidade-maior,
+    .cliente-form-grid .campo-uf-menor,
+    .cliente-form-grid .campo-endereco-maior,
+    .cliente-form-grid .campo-numero-menor,
+    .cliente-form-grid .campo-bairro-ajustado,
+    .cliente-form-grid-ajustado .campo-nome-ajustado,
+    .cliente-form-grid-ajustado .campo-cpf-menor,
+    .cliente-form-grid-ajustado .campo-data-nascimento,
+    .cliente-form-grid-ajustado .campo-telefone-menor,
+    .cliente-form-grid-ajustado .campo-celular-maior,
+    .cliente-form-grid-ajustado .campo-email-ajustado,
+    .cliente-form-grid-ajustado .campo-cep-menor,
+    .cliente-form-grid-ajustado .campo-cidade-maior,
+    .cliente-form-grid-ajustado .campo-uf-menor,
+    .cliente-form-grid-ajustado .campo-endereco-maior,
+    .cliente-form-grid-ajustado .campo-numero-menor,
+    .cliente-form-grid-ajustado .campo-bairro-ajustado {
+        grid-column: span 1;
     }
 
     .ordem-form-card .ordem-grid {
@@ -1085,9 +1307,8 @@ input[name="cep"] {
         gap: 20px;
     }
 }
-
 /* =========================
-   RESPONSIVO MOBILE / TABLET
+   RESPONSIVO - MOBILE/TABLET
 ========================= */
 
 @media (max-width: 1024px) {
@@ -1096,13 +1317,13 @@ input[name="cep"] {
         position: fixed;
         top: 14px;
         left: 14px;
-        z-index: 100001;
+        z-index: 220000;
         width: 46px;
         height: 46px;
         border: none;
         border-radius: 12px;
         background-color: #2F80A0;
-        color: #ffffff;
+        color: #FFFFFF;
         align-items: center;
         justify-content: center;
         font-size: 1.6rem;
@@ -1111,23 +1332,23 @@ input[name="cep"] {
     }
 
     .layout {
-        display: block !important;
+        display: block;
         min-height: 100vh;
     }
 
     .sidebar {
-        position: fixed !important;
+        position: fixed;
         top: 0;
         left: 0;
-        z-index: 100000;
-        width: 280px !important;
+        z-index: 200000;
+        width: 280px;
         max-width: 82vw;
-        height: 100vh !important;
-        min-height: 100vh !important;
+        height: 100vh;
+        min-height: 100vh;
         overflow-y: auto;
         transform: translateX(-105%);
         transition: transform 0.25s ease;
-        padding-top: 80px;
+        padding-top: 72px;
     }
 
     .sidebar.aberta {
@@ -1135,43 +1356,42 @@ input[name="cep"] {
     }
 
     .sidebar-logo {
-        margin-bottom: 28px;
+        min-height: 92px;
+        margin-bottom: 12px;
     }
 
-    .logo-imagem {
-        width: 190px;
+    .logo-imagem,
+    .sidebar-logo img,
+    .logo-sidebar,
+    .sidebar img {
+        max-width: 210px;
     }
 
     .main-content {
-        width: 100% !important;
-        padding: 92px 14px 18px 14px !important;
+        width: 100%;
+        padding: 92px 14px 18px;
     }
 
     .content-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 16px !important;
-        border-radius: 16px !important;
+        width: 100%;
+        max-width: 100%;
+        padding: 16px;
+        border-radius: 16px;
     }
 
     .page-header {
         flex-direction: column;
-        align-items: flex-start !important;
-        gap: 12px !important;
+        align-items: flex-start;
+        gap: 12px;
     }
 
     .page-title {
-        font-size: 1.45rem !important;
+        font-size: 1.45rem;
         line-height: 1.2;
     }
 
     .page-subtitle {
-        font-size: 0.8rem !important;
-    }
-
-    .usuario-logado {
-        font-size: 0.9rem !important;
-        white-space: normal !important;
+        font-size: 0.8rem;
     }
 
     .resumo-cards {
@@ -1185,43 +1405,50 @@ input[name="cep"] {
 
     .filtro-grid,
     .form-grid,
-    .cliente-form-grid {
-        grid-template-columns: 1fr !important;
+    .cliente-form-grid,
+    .cliente-form-grid-ajustado {
+        grid-template-columns: 1fr;
     }
 
-    .campo-nome-ajustado,
-    .campo-email-ajustado,
-    .campo-cidade-maior,
-    .campo-endereco-maior,
-    .campo-bairro-ajustado,
-    .campo-cpf-menor,
-    .campo-data-nascimento,
-    .campo-telefone-menor,
-    .campo-celular-maior,
-    .campo-cep-menor,
-    .campo-numero-menor,
-    .campo-uf-menor,
-    #ufCliente,
-    input[name="numero"],
-    input[name="telefone"],
-    input[name="celular"],
-    input[name="cep"] {
-        max-width: 100% !important;
-        width: 100% !important;
+    .cliente-form-grid .campo-nome-ajustado,
+    .cliente-form-grid .campo-cpf-menor,
+    .cliente-form-grid .campo-data-nascimento,
+    .cliente-form-grid .campo-telefone-menor,
+    .cliente-form-grid .campo-celular-maior,
+    .cliente-form-grid .campo-email-ajustado,
+    .cliente-form-grid .campo-cep-menor,
+    .cliente-form-grid .campo-cidade-maior,
+    .cliente-form-grid .campo-uf-menor,
+    .cliente-form-grid .campo-endereco-maior,
+    .cliente-form-grid .campo-numero-menor,
+    .cliente-form-grid .campo-bairro-ajustado,
+    .cliente-form-grid-ajustado .campo-nome-ajustado,
+    .cliente-form-grid-ajustado .campo-cpf-menor,
+    .cliente-form-grid-ajustado .campo-data-nascimento,
+    .cliente-form-grid-ajustado .campo-telefone-menor,
+    .cliente-form-grid-ajustado .campo-celular-maior,
+    .cliente-form-grid-ajustado .campo-email-ajustado,
+    .cliente-form-grid-ajustado .campo-cep-menor,
+    .cliente-form-grid-ajustado .campo-cidade-maior,
+    .cliente-form-grid-ajustado .campo-uf-menor,
+    .cliente-form-grid-ajustado .campo-endereco-maior,
+    .cliente-form-grid-ajustado .campo-numero-menor,
+    .cliente-form-grid-ajustado .campo-bairro-ajustado {
+        grid-column: span 1;
     }
 
     .ordem-content-card {
-        min-height: auto !important;
+        min-height: auto;
     }
 
     .ordem-form-card {
-        min-height: auto !important;
-        padding: 16px !important;
-        justify-content: flex-start !important;
+        min-height: auto;
+        padding: 16px;
+        justify-content: flex-start;
     }
 
     .ordem-form-card .ordem-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
         grid-template-areas:
             "cliente"
             "servico"
@@ -1230,20 +1457,8 @@ input[name="cep"] {
             "dataAbertura"
             "previsao"
             "descricao"
-            "observacao" !important;
-        gap: 16px !important;
-    }
-
-    .ordem-form-card .campo-cliente,
-    .ordem-form-card .campo-servico,
-    .ordem-form-card .campo-status,
-    .ordem-form-card .campo-valor,
-    .ordem-form-card .campo-data-abertura,
-    .ordem-form-card .campo-data-previsao,
-    .ordem-form-card .campo-descricao-servico,
-    .ordem-form-card .campo-observacao {
-        max-width: 100% !important;
-        width: 100% !important;
+            "observacao";
+        gap: 16px;
     }
 
     .cliente-busca-wrapper {
@@ -1257,25 +1472,10 @@ input[name="cep"] {
         min-width: 0;
     }
 
-    .campo-descricao-servico textarea,
-    .campo-observacao textarea {
-        min-height: 100px;
-    }
-
-    .ordem-form-actions {
-        margin-top: 22px;
-        flex-direction: column;
-    }
-
     .form-actions,
     .filtro-acoes {
-        flex-direction: column;
+        margin-top: 22px;
         gap: 10px;
-    }
-
-    .primary-button,
-    .secondary-button {
-        width: 100%;
     }
 
     .table-container {
@@ -1286,57 +1486,137 @@ input[name="cep"] {
         white-space: normal;
     }
 
+    .modal-clientes {
+        padding: 16px;
+    }
+
+    .modal-clientes-card {
+        margin-top: 10px;
+        padding: 18px;
+    }
+
+    .modal-senha-actions {
+        flex-direction: column;
+    }
+
+    .modal-senha-actions .primary-button,
+    .modal-senha-actions .secondary-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    body.menu-mobile-aberto::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 190000;
+        background: rgba(0, 0, 0, 0.45);
+    }
+
+    body.menu-mobile-aberto .sidebar {
+        z-index: 200000;
+    }
+
+    body.menu-mobile-aberto .mobile-menu-button {
+        z-index: 220000;
+    }
+}
+
+/* =========================
+   BOTÕES DA ORDEM
+   Desktop/notebook: lado a lado
+   Celular: um embaixo do outro
+========================= */
+
+.ordem-form-actions,
+.filtro-acoes.ordem-form-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-top: 34px;
+}
+
+.ordem-form-actions .primary-button,
+.ordem-form-actions .secondary-button,
+.filtro-acoes.ordem-form-actions .primary-button,
+.filtro-acoes.ordem-form-actions .secondary-button {
+    width: auto;
+    min-width: 145px;
+}
+
+@media (max-width: 768px) {
+    .ordem-form-actions,
+    .filtro-acoes.ordem-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ordem-form-actions .primary-button,
+    .ordem-form-actions .secondary-button,
+    .filtro-acoes.ordem-form-actions .primary-button,
+    .filtro-acoes.ordem-form-actions .secondary-button {
+        width: 100%;
+    }
+}
+
+/* =========================
+   RESPONSIVO ESPECIAL - ORDENS EM CARDS
+========================= */
+
+@media (max-width: 1024px) {
     .ordens-table-container {
-        overflow-x: visible !important;
+        overflow-x: visible;
     }
 
     .ordens-table {
-        min-width: 0 !important;
-        width: 100% !important;
-        border-collapse: separate !important;
-        border-spacing: 0 14px !important;
-        background: transparent !important;
+        min-width: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        background: transparent;
     }
 
     .ordens-table thead {
-        display: none !important;
+        display: none;
     }
 
     .ordens-table tbody {
-        display: block !important;
-        width: 100% !important;
+        display: block;
+        width: 100%;
     }
 
     .ordens-table tr.ordem-card-row {
-        display: block !important;
-        width: 100% !important;
-        margin-bottom: 16px !important;
-        padding: 14px !important;
-        border: 1px solid #dbe1e8 !important;
-        border-radius: 16px !important;
-        background: #ffffff !important;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12) !important;
+        display: block;
+        width: 100%;
+        margin-bottom: 16px;
+        padding: 14px;
+        border: 1px solid #dbe1e8;
+        border-radius: 16px;
+        background: #FFFFFF;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
     }
 
     .ordens-table tr.ordem-card-row:hover {
-        background: #ffffff !important;
+        background: #FFFFFF;
     }
 
     .ordens-table tr.ordem-card-row td {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
-        width: 100% !important;
-        padding: 10px 0 !important;
-        border-bottom: 1px solid #edf2f7 !important;
-        text-align: left !important;
-        white-space: normal !important;
-        word-break: break-word !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+        padding: 10px 0;
+        border-bottom: 1px solid #edf2f7;
+        text-align: left;
+        white-space: normal;
+        word-break: break-word;
     }
 
     .ordens-table tr.ordem-card-row td:last-child {
-        border-bottom: none !important;
+        border-bottom: none;
     }
 
     .ordens-table tr.ordem-card-row td::before {
@@ -1351,13 +1631,13 @@ input[name="cep"] {
     }
 
     .ordens-table .ordem-cliente-cell {
-        display: block !important;
+        display: block;
     }
 
     .ordens-table .ordem-cliente-cell::before {
-        display: block !important;
+        display: block;
         margin-bottom: 8px;
-        max-width: none !important;
+        max-width: none;
     }
 
     .cliente-toggle {
@@ -1377,10 +1657,6 @@ input[name="cep"] {
         word-break: break-word;
     }
 
-    .cliente-detalhes p {
-        margin-bottom: 8px;
-    }
-
     .acoes-tabela {
         width: 100%;
         justify-content: flex-end;
@@ -1394,104 +1670,5 @@ input[name="cep"] {
 
     .status-badge {
         white-space: nowrap;
-    }
-
-    .empty-message {
-        display: block !important;
-        width: 100% !important;
-        text-align: center !important;
-    }
-
-    .modal-clientes {
-        padding: 16px;
-    }
-
-    .modal-clientes-card {
-        margin-top: 10px;
-        padding: 18px;
-    }
-
-    body.menu-mobile-aberto::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        background: rgba(0, 0, 0, 0.45);
-    }
-
-    body.menu-mobile-aberto .sidebar {
-        z-index: 100000;
-    }
-
-    body.menu-mobile-aberto .mobile-menu-button {
-        z-index: 100001;
-    }
-}
-/* =========================================================
-   AJUSTE FINAL - LOGO E MENU DA SIDEBAR
-   Logo mais alta, menos espaço vazio e botões mais próximos
-========================================================= */
-
-.sidebar {
-    padding: 14px 18px 24px 18px !important;
-}
-
-.sidebar-logo {
-    margin-bottom: 18px !important;
-    padding: 2px 0 6px 0 !important;
-    min-height: auto !important;
-}
-
-.logo-imagem,
-.sidebar-logo img,
-.logo-sidebar,
-.sidebar img {
-    max-width: 210px !important;
-    width: auto !important;
-    height: auto !important;
-    display: block !important;
-    margin: 0 auto !important;
-}
-
-.sidebar-menu {
-    gap: 13px !important;
-}
-
-.menu-toggle,
-.sidebar-link,
-.submenu-link {
-    padding: 13px 15px !important;
-}
-
-.submenu {
-    margin-top: 4px !important;
-    padding: 8px !important;
-}
-
-.sidebar-user-card {
-    padding-top: 18px !important;
-}
-
-/* Ajuste no menu mobile */
-@media (max-width: 1024px) {
-    .sidebar {
-        padding-top: 72px !important;
-    }
-
-    .sidebar-logo {
-        margin-bottom: 16px !important;
-        padding: 2px 0 6px 0 !important;
-    }
-
-    .logo-imagem,
-    .sidebar-logo img,
-    .logo-sidebar,
-    .sidebar img {
-        max-width: 180px !important;
-        width: auto !important;
-    }
-
-    .sidebar-menu {
-        gap: 12px !important;
     }
 }

@@ -22,10 +22,16 @@ public class ClienteService {
     }
 
     public List<Cliente> listarTodos() {
-        return clienteRepository.findAll();
+        return clienteRepository.findAllByAtivoTrue();
     }
 
     public Cliente salvar(Cliente cliente) {
+        validarCliente(cliente);
+
+        if (cliente.getAtivo() == null) {
+            cliente.setAtivo(true);
+        }
+
         if (cliente.getCep() != null) {
             cliente.setCep(cliente.getCep().replaceAll("\\D", ""));
         }
@@ -38,6 +44,10 @@ public class ClienteService {
             cliente.setTelefone(cliente.getTelefone().replaceAll("\\D", ""));
         }
 
+        if (cliente.getCelular() != null) {
+            cliente.setCelular(cliente.getCelular().replaceAll("\\D", ""));
+        }
+
         return clienteRepository.save(cliente);
     }
 
@@ -46,18 +56,42 @@ public class ClienteService {
     }
 
     public List<Cliente> buscarComFiltro(String filtro) {
-        return clienteRepository.buscarComFiltro(filtro);
+        if (filtro == null || filtro.trim().isEmpty()) {
+            return clienteRepository.findTop5ByAtivoTrueOrderByIdClienteDesc();
+        }
+
+        String filtroTexto = filtro.trim();
+        String filtroNumerico = filtroTexto.replaceAll("\\D", "");
+
+        return clienteRepository.buscarComFiltroAtivos(filtroTexto, filtroNumerico);
     }
 
     public void excluirPorId(Long id) {
-        if (ordemServicoRepository.existsByCliente_IdCliente(id)) {
-            throw new IllegalStateException("Não é possível excluir este cliente, pois ele possui ordem de serviço vinculada.");
+        Cliente cliente = buscarPorId(id);
+
+        if (cliente == null) {
+            throw new IllegalStateException("Cliente não encontrado.");
         }
 
-        clienteRepository.deleteById(id);
+        cliente.setAtivo(false);
+        clienteRepository.save(cliente);
     }
 
     public boolean existeClienteNaCidade(Long idCidade) {
         return clienteRepository.existsByCidade_IdCidade(idCidade);
+    }
+
+    private void validarCliente(Cliente cliente) {
+        if (cliente == null) {
+            throw new IllegalStateException("Dados do cliente não informados.");
+        }
+
+        if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
+            throw new IllegalStateException("Informe o nome do cliente.");
+        }
+
+        if (cliente.getCidade() == null || cliente.getCidade().getIdCidade() == null) {
+            throw new IllegalStateException("Selecione uma cidade para o cliente.");
+        }
     }
 }

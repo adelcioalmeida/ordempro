@@ -36,11 +36,18 @@ public class CidadeController {
     @PostMapping("/salvar")
     public String salvarCidade(
             @ModelAttribute Cidade cidade,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
-        cidadeService.salvar(cidade);
-        redirectAttributes.addFlashAttribute("sucesso", "Cidade salva com sucesso.");
-        return "redirect:/cidades";
+        try {
+            cidadeService.salvar(cidade);
+            redirectAttributes.addFlashAttribute("sucesso", "Cidade salva com sucesso.");
+            return "redirect:/cidades";
+        } catch (IllegalStateException e) {
+            model.addAttribute("erro", e.getMessage());
+            model.addAttribute("cidade", cidade);
+            return "cidade-form";
+        }
     }
 
     @GetMapping("/excluir/{id}")

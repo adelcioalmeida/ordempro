@@ -111,6 +111,16 @@
                 </a>
             </div>
 
+            <div th:if="${erro}" class="alert-error">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}"></span>
+            </div>
+
+            <div th:if="${sucesso}" class="alert-success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}"></span>
+            </div>
+
             <form th:action="@{/cidades/salvar}" th:object="${cidade}" method="post">
                 <input type="hidden" th:field="*{idCidade}">
 

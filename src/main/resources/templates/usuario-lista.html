@@ -89,8 +89,7 @@
                     </span>
 
                     <span class="sidebar-user-profile">
-                        Perfil:
-                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
+                        Administrador do sistema
                     </span>
                 </div>
             </div>
@@ -98,12 +97,13 @@
     </aside>
 
     <main class="main-content">
-        <section class="content-card">
+        <section class="content-card usuario-content-card">
 
             <div class="page-header">
 
                 <div>
                     <h1 class="page-title">USUÁRIOS CADASTRADOS</h1>
+                    <p class="page-subtitle">GERENCIAMENTO DOS USUÁRIOS COM ACESSO AO SISTEMA</p>
                 </div>
 
                 <a class="primary-button" th:href="@{/usuarios/novo}">
@@ -112,10 +112,31 @@
                 </a>
             </div>
 
-            <div th:if="${sucesso}" class="alerta alerta-sucesso" th:text="${sucesso}"></div>
-            <div th:if="${erro}" class="alerta alerta-erro" th:text="${erro}"></div>
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
 
-            <div class="table-container">
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
+
+            <div class="resumo-cards usuario-resumo-cards">
+                <div class="resumo-card">
+                    <span class="resumo-label">TOTAL</span>
+                    <strong class="resumo-valor" th:text="${#lists.size(usuarios)}">0</strong>
+                    <span class="resumo-texto">USUÁRIOS CADASTRADOS</span>
+                </div>
+
+                <div class="resumo-card">
+                    <span class="resumo-label">ACESSO</span>
+                    <strong class="resumo-valor">ADMIN</strong>
+                    <span class="resumo-texto">GERENCIAMENTO RESTRITO</span>
+                </div>
+            </div>
+
+            <div class="table-container usuario-table-container">
                 <table class="data-table">
                     <thead>
                     <tr>
@@ -124,7 +145,7 @@
                         <th>E-MAIL</th>
                         <th>TELEFONE</th>
                         <th>FUNÇÃO</th>
-                        <th>ATIVO</th>
+                        <th>STATUS</th>
                         <th>AÇÕES</th>
                     </tr>
                     </thead>
@@ -132,17 +153,36 @@
                     <tbody>
                     <tr th:each="usuario : ${usuarios}">
                         <td th:text="${usuario.idUsuario}"></td>
-                        <td th:text="${usuario.nome}"></td>
-                        <td th:text="${usuario.email}"></td>
-                        <td th:text="${usuario.telefone}"></td>
-                        <td th:text="${usuario.funcao != null ? usuario.funcao.nome : 'NÃO INFORMADA'}"></td>
-                        <td th:text="${usuario.ativo != null && usuario.ativo ? 'SIM' : 'NÃO'}"></td>
+
+                        <td>
+                            <strong th:text="${usuario.nome}">NOME DO USUÁRIO</strong>
+                        </td>
+
+                        <td th:text="${usuario.email != null and !#strings.isEmpty(usuario.email) ? usuario.email : 'NÃO INFORMADO'}"></td>
+
+                        <td th:text="${usuario.telefone != null and !#strings.isEmpty(usuario.telefone) ? T(br.com.ordempro.util.FormatadorUtils).formatarTelefone(usuario.telefone) : 'NÃO INFORMADO'}"></td>
+
+                        <td>
+                            <span class="status-badge status-aberta"
+                                  th:text="${usuario.funcao != null ? usuario.funcao.nome : 'NÃO INFORMADA'}">
+                                FUNÇÃO
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="status-badge"
+                                  th:text="${usuario.ativo != null && usuario.ativo ? 'ATIVO' : 'INATIVO'}"
+                                  th:classappend="${usuario.ativo != null && usuario.ativo ? ' status-finalizada' : ' status-cancelada'}">
+                                ATIVO
+                            </span>
+                        </td>
+
                         <td>
                             <div class="acoes-tabela">
 
                                 <a class="action-icon edit-icon"
                                    th:href="@{/usuarios/editar/{id}(id=${usuario.idUsuario})}"
-                                   title="EDITAR">
+                                   title="EDITAR USUÁRIO">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 
@@ -150,7 +190,7 @@
                                    class="action-icon delete-icon"
                                    th:href="@{/usuarios/excluir/{id}(id=${usuario.idUsuario})}"
                                    onclick="return confirm('Tem certeza que deseja excluir este usuário?')"
-                                   title="EXCLUIR">
+                                   title="EXCLUIR USUÁRIO">
                                     <i class="bi bi-trash-fill"></i>
                                 </a>
 

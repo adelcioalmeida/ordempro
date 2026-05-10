@@ -6,6 +6,7 @@ import br.com.ordempro.model.ItemOrdemServico;
 import br.com.ordempro.model.OrdemServico;
 import br.com.ordempro.model.Servico;
 import br.com.ordempro.model.Usuario;
+import br.com.ordempro.service.CidadeService;
 import br.com.ordempro.service.ClienteService;
 import br.com.ordempro.service.EmailService;
 import br.com.ordempro.service.ItemOrdemServicoService;
@@ -17,9 +18,14 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -32,8 +38,13 @@ public class OrdemServicoController {
     private static final String STATUS_FINALIZADA = "FINALIZADA";
     private static final String STATUS_CANCELADA = "CANCELADA";
 
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String ROLE_GERENTE = "ROLE_GERENTE";
+    private static final String ROLE_VENDEDOR = "ROLE_VENDEDOR";
+
     private final OrdemServicoService ordemServicoService;
     private final ClienteService clienteService;
+    private final CidadeService cidadeService;
     private final ServicoService servicoService;
     private final ItemOrdemServicoService itemOrdemServicoService;
     private final UsuarioService usuarioService;
@@ -43,6 +54,7 @@ public class OrdemServicoController {
     public OrdemServicoController(
             OrdemServicoService ordemServicoService,
             ClienteService clienteService,
+            CidadeService cidadeService,
             ServicoService servicoService,
             ItemOrdemServicoService itemOrdemServicoService,
             UsuarioService usuarioService,
@@ -51,6 +63,7 @@ public class OrdemServicoController {
     ) {
         this.ordemServicoService = ordemServicoService;
         this.clienteService = clienteService;
+        this.cidadeService = cidadeService;
         this.servicoService = servicoService;
         this.itemOrdemServicoService = itemOrdemServicoService;
         this.usuarioService = usuarioService;
@@ -68,9 +81,12 @@ public class OrdemServicoController {
 
         if (idCliente != null) {
             form.setIdCliente(idCliente);
+            adicionarNomeClienteSelecionado(model, idCliente);
         }
 
         model.addAttribute("ordemForm", form);
+        model.addAttribute("modoEdicao", false);
+
         return carregarFormulario(model);
     }
 
@@ -78,12 +94,21 @@ public class OrdemServicoController {
     public String editarOrdem(
             @PathVariable Long id,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            Authentication authentication
     ) {
         OrdemServico ordemServico = ordemServicoService.buscarComClientePorId(id);
 
         if (ordemServico == null) {
             redirectAttributes.addFlashAttribute("erro", "Ordem de serviço não encontrada.");
+            return "redirect:/ordens";
+        }
+
+        if (usuarioEhVendedor(authentication) && !statusIgual(ordemServico, STATUS_ABERTA)) {
+            redirectAttributes.addFlashAttribute(
+                    "erro",
+                    "Vendedor só pode editar ordens de serviço com status ABERTA."
+            );
             return "redirect:/ordens";
         }
 
@@ -104,8 +129,14 @@ public class OrdemServicoController {
             form.setDescricao(item.getDescricao());
         }
 
+        if (ordemServico.getCliente() != null) {
+            model.addAttribute("nomeClienteSelecionado", ordemServico.getCliente().getNome());
+        }
+
         model.addAttribute("ordemForm", form);
         model.addAttribute("modoEdicao", true);
+        model.addAttribute("usuarioVendedor", usuarioEhVendedor(authentication));
+
         return carregarFormulario(model);
     }
 
@@ -113,12 +144,15 @@ public class OrdemServicoController {
     public String salvarOrdem(
             @ModelAttribute("ordemForm") OrdemServicoFormDTO form,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            Authentication authentication
     ) {
         if (camposObrigatoriosInvalidos(form)) {
             model.addAttribute("erro", "Preencha os campos obrigatórios: cliente e descrição.");
             model.addAttribute("modoEdicao", form.getIdOs() != null);
             model.addAttribute("ordemForm", form);
+            model.addAttribute("usuarioVendedor", usuarioEhVendedor(authentication));
+            adicionarNomeClienteSelecionado(model, form.getIdCliente());
             return carregarFormulario(model);
         }
 
@@ -130,6 +164,8 @@ public class OrdemServicoController {
             model.addAttribute("erro", "Cliente ou usuário inválido.");
             model.addAttribute("modoEdicao", form.getIdOs() != null);
             model.addAttribute("ordemForm", form);
+            model.addAttribute("usuarioVendedor", usuarioEhVendedor(authentication));
+            adicionarNomeClienteSelecionado(model, form.getIdCliente());
             return carregarFormulario(model);
         }
 
@@ -141,24 +177,42 @@ public class OrdemServicoController {
             model.addAttribute("erro", "Valor inválido. Digite no formato 0,00.");
             model.addAttribute("modoEdicao", form.getIdOs() != null);
             model.addAttribute("ordemForm", form);
+            model.addAttribute("usuarioVendedor", usuarioEhVendedor(authentication));
+            adicionarNomeClienteSelecionado(model, form.getIdCliente());
             return carregarFormulario(model);
         }
 
         OrdemServico ordemServico = obterOuCriarOrdemServico(form);
+
+        if (ordemServico.getIdOs() != null && usuarioEhVendedor(authentication)) {
+            if (!statusIgual(ordemServico, STATUS_ABERTA)) {
+                redirectAttributes.addFlashAttribute(
+                        "erro",
+                        "Vendedor só pode editar ordens de serviço com status ABERTA."
+                );
+                return "redirect:/ordens";
+            }
+
+            form.setStatus(ordemServico.getStatus());
+        }
+
         ordemServico.setCliente(cliente);
-        ordemServico.setUsuario(usuario);
+
+        if (ordemServico.getIdOs() == null) {
+            ordemServico.setUsuario(usuario);
+            ordemServico.setEmailEnviado(false);
+            ordemServico.setDataEnvioEmail(null);
+            ordemServico.setStatus(STATUS_ABERTA);
+        } else if (usuarioPodeAlterarStatus(authentication)) {
+            ordemServico.setStatus(form.getStatus());
+        }
+
         ordemServico.setDataAbertura(
                 form.getDataAbertura() != null ? form.getDataAbertura() : LocalDateTime.now()
         );
         ordemServico.setDataPrevistaConclusao(form.getDataPrevistaConclusao());
-        ordemServico.setStatus(form.getStatus());
         ordemServico.setObservacao(form.getObservacao());
         ordemServico.setValorTotal(valor);
-
-        if (ordemServico.getIdOs() == null) {
-            ordemServico.setEmailEnviado(false);
-            ordemServico.setDataEnvioEmail(null);
-        }
 
         ordemServico = ordemServicoService.salvar(ordemServico);
 
@@ -313,6 +367,7 @@ public class OrdemServicoController {
     private OrdemServico obterOuCriarOrdemServico(OrdemServicoFormDTO form) {
         if (form.getIdOs() != null) {
             OrdemServico existente = ordemServicoService.buscarPorId(form.getIdOs());
+
             if (existente != null) {
                 return existente;
             }
@@ -327,6 +382,7 @@ public class OrdemServicoController {
     ) {
         if (form.getIdItem() != null) {
             ItemOrdemServico existente = itemOrdemServicoService.buscarPrimeiroPorIdOrdem(ordemServico.getIdOs());
+
             if (existente != null) {
                 return existente;
             }
@@ -340,9 +396,41 @@ public class OrdemServicoController {
                 ordemServico.getStatus().equalsIgnoreCase(status);
     }
 
+    private boolean usuarioEhVendedor(Authentication authentication) {
+        return usuarioTemPerfil(authentication, ROLE_VENDEDOR);
+    }
+
+    private boolean usuarioPodeAlterarStatus(Authentication authentication) {
+        return usuarioTemPerfil(authentication, ROLE_ADMIN) ||
+                usuarioTemPerfil(authentication, ROLE_GERENTE);
+    }
+
+    private boolean usuarioTemPerfil(Authentication authentication, String perfil) {
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+
+        return authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority -> perfil.equals(authority.getAuthority()));
+    }
+
+    private void adicionarNomeClienteSelecionado(Model model, Long idCliente) {
+        if (idCliente == null) {
+            return;
+        }
+
+        Cliente cliente = clienteService.buscarPorId(idCliente);
+
+        if (cliente != null) {
+            model.addAttribute("nomeClienteSelecionado", cliente.getNome());
+        }
+    }
+
     private String carregarFormulario(Model model) {
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("clientesModal", clienteService.listarTodos());
+        model.addAttribute("cidades", cidadeService.listarTodas());
         model.addAttribute("servicos", servicoService.listarTodos());
 
         return "ordem-servico";

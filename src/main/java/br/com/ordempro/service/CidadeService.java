@@ -48,6 +48,22 @@ public class CidadeService {
     }
 
     public Cidade salvar(Cidade cidade) {
+        String nome = cidade.getNome() != null ? cidade.getNome().trim() : "";
+        String uf = cidade.getUf() != null ? cidade.getUf().trim().toUpperCase() : "";
+
+        if (nome.isBlank() || uf.isBlank()) {
+            throw new IllegalStateException("Informe o nome da cidade e a UF.");
+        }
+
+        boolean cidadeDuplicada = cidadeRepository.existsByNomeIgnoreCaseAndUfIgnoreCase(nome, uf);
+
+        if (cidadeDuplicada && cidade.getIdCidade() == null) {
+            throw new IllegalStateException("Essa cidade já está cadastrada.");
+        }
+
+        cidade.setNome(nome);
+        cidade.setUf(uf);
+
         return cidadeRepository.save(cidade);
     }
 

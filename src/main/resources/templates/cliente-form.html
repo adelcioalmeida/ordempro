@@ -117,12 +117,22 @@
                 </a>
             </div>
 
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
+
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
+
             <form th:action="@{/clientes/salvar}" th:object="${cliente}" method="post">
 
                 <input type="hidden" th:field="*{idCliente}">
                 <input type="hidden" name="origem" th:value="${origem}">
 
-                <div class="form-grid cliente-form-grid">
+                <div class="form-grid cliente-form-grid cliente-form-grid-ajustado">
 
                     <div class="form-group campo-nome-ajustado">
                         <label class="form-label">NOME</label>

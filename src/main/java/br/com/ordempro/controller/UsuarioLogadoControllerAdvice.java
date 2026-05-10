@@ -19,15 +19,13 @@ public class UsuarioLogadoControllerAdvice {
 
     @ModelAttribute("usuarioLogado")
     public Usuario usuarioLogado() {
-        try {
-            return usuarioService.buscarUsuarioLogado();
-        } catch (Exception exception) {
-            return null;
-        }
+        return buscarUsuarioLogadoComSeguranca();
     }
 
     @ModelAttribute("usuarioLogadoNome")
-    public String usuarioLogadoNome(@ModelAttribute("usuarioLogado") Usuario usuario) {
+    public String usuarioLogadoNome() {
+        Usuario usuario = buscarUsuarioLogadoComSeguranca();
+
         if (usuario == null || textoEmBranco(usuario.getNome())) {
             return NOME_PADRAO;
         }
@@ -36,7 +34,9 @@ public class UsuarioLogadoControllerAdvice {
     }
 
     @ModelAttribute("usuarioLogadoPerfil")
-    public String usuarioLogadoPerfil(@ModelAttribute("usuarioLogado") Usuario usuario) {
+    public String usuarioLogadoPerfil() {
+        Usuario usuario = buscarUsuarioLogadoComSeguranca();
+
         if (usuario == null ||
                 usuario.getFuncao() == null ||
                 textoEmBranco(usuario.getFuncao().getNome())) {
@@ -44,6 +44,14 @@ public class UsuarioLogadoControllerAdvice {
         }
 
         return usuario.getFuncao().getNome().trim().toUpperCase();
+    }
+
+    private Usuario buscarUsuarioLogadoComSeguranca() {
+        try {
+            return usuarioService.buscarUsuarioLogado();
+        } catch (Exception exception) {
+            return null;
+        }
     }
 
     private boolean textoEmBranco(String texto) {

@@ -32,7 +32,11 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
-                        // Apenas ADMIN pode acessar usuários
+                        // ADMIN, GERENTE e VENDEDOR podem alterar a própria senha
+                        .requestMatchers("/usuarios/alterar-senha")
+                        .hasAnyRole("ADMIN", "GERENTE", "VENDEDOR")
+
+                        // Apenas ADMIN pode acessar o gerenciamento de usuários
                         .requestMatchers("/usuarios/**")
                         .hasRole("ADMIN")
 
@@ -48,23 +52,27 @@ public class SecurityConfig {
                                 "/clientes/excluir/**"
                         ).hasAnyRole("ADMIN", "GERENTE")
 
-                        // ADMIN e GERENTE podem cadastrar clientes livremente
+                        // ADMIN, GERENTE e VENDEDOR podem cadastrar clientes
                         .requestMatchers(
                                 "/clientes/novo",
                                 "/clientes/salvar"
                         ).hasAnyRole("ADMIN", "GERENTE", "VENDEDOR")
 
-                        // ADMIN, GERENTE e VENDEDOR podem buscar clientes
+                        // ADMIN, GERENTE e VENDEDOR podem visualizar e buscar clientes
                         .requestMatchers(
                                 "/clientes",
                                 "/clientes/**"
                         ).hasAnyRole("ADMIN", "GERENTE", "VENDEDOR")
 
-                        // ADMIN e GERENTE podem editar, atualizar e cancelar ordens
-                        .requestMatchers(
-                                "/ordens/editar/**",
-                                "/ordens/cancelar/**"
-                        ).hasAnyRole("ADMIN", "GERENTE")
+                        // ADMIN, GERENTE e VENDEDOR podem abrir a tela de edição.
+                        // A regra fina está no OrdemServicoController:
+                        // vendedor só edita ordem ABERTA e não altera status.
+                        .requestMatchers("/ordens/editar/**")
+                        .hasAnyRole("ADMIN", "GERENTE", "VENDEDOR")
+
+                        // Apenas ADMIN e GERENTE podem cancelar ordens
+                        .requestMatchers("/ordens/cancelar/**")
+                        .hasAnyRole("ADMIN", "GERENTE")
 
                         // Bloqueia exclusão real de ordens
                         .requestMatchers("/ordens/excluir/**")

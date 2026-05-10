@@ -81,21 +81,27 @@
         </nav>
 
         <div class="sidebar-user-card">
-            <div class="sidebar-user-info">
-                <i class="bi bi-person-circle"></i>
+            <button type="button"
+                    class="sidebar-user-button"
+                    onclick="abrirModalAlterarSenha()"
+                    title="Alterar minha senha">
+                <div class="sidebar-user-info">
+                    <i class="bi bi-person-circle"></i>
 
-                <div>
-                    <span class="sidebar-user-name"
-                          th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
-                        USUÁRIO • PERFIL
-                    </span>
+                    <div>
+                        <span class="sidebar-user-name"
+                              th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                            USUÁRIO • PERFIL
+                        </span>
 
-                    <span class="sidebar-user-profile">
-                        Perfil:
-                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
-                    </span>
+                        <span class="sidebar-user-profile">
+                            Clique para alterar senha
+                        </span>
+                    </div>
                 </div>
-            </div>
+
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
         </div>
     </aside>
 
@@ -127,7 +133,15 @@
                 </a>
             </div>
 
-            <div th:if="${erro}" class="alerta alerta-erro" th:text="${erro}"></div>
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
+
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
 
             <form th:action="@{/ordens/salvar}"
                   th:object="${ordemForm}"
@@ -175,12 +189,28 @@
                     <div class="form-group campo-status">
                         <label class="form-label" for="status">STATUS</label>
 
-                        <select class="form-select" id="status" th:field="*{status}">
-                            <option value="ABERTA">ABERTA</option>
-                            <option value="EM_ANDAMENTO">EM ANDAMENTO</option>
-                            <option value="FINALIZADA">FINALIZADA</option>
-                            <option value="CANCELADA">CANCELADA</option>
-                        </select>
+                        <div sec:authorize="hasAnyRole('ADMIN', 'GERENTE')">
+                            <select class="form-select" id="status" th:field="*{status}">
+                                <option value="ABERTA">ABERTA</option>
+                                <option value="EM_ANDAMENTO">EM ANDAMENTO</option>
+                                <option value="FINALIZADA">FINALIZADA</option>
+                                <option value="CANCELADA">CANCELADA</option>
+                            </select>
+                        </div>
+
+                        <div sec:authorize="hasRole('VENDEDOR')">
+                            <input type="hidden" th:field="*{status}">
+
+                            <input class="form-input"
+                                   type="text"
+                                   th:value="*{status}"
+                                   readonly
+                                   title="Vendedor não pode alterar o status da ordem">
+
+                            <small class="page-subtitle" style="margin-top: 4px;">
+                                VENDEDOR NÃO ALTERA STATUS
+                            </small>
+                        </div>
                     </div>
 
                     <div class="form-group campo-valor">
@@ -198,7 +228,7 @@
                         <label class="form-label" for="dataAbertura">DATA DE ABERTURA</label>
 
                         <input class="form-input data-input"
-                               type="date"
+                               type="datetime-local"
                                id="dataAbertura"
                                th:field="*{dataAbertura}">
                     </div>
@@ -215,26 +245,33 @@
                     <div class="form-group campo-descricao-servico">
                         <label class="form-label" for="descricao">DESCRIÇÃO DO SERVIÇO</label>
 
-                        <textarea class="form-input auto-expand"
+                        <textarea class="form-input campo-texto-modal"
                                   id="descricao"
                                   th:field="*{descricao}"
-                                  rows="3"
-                                  placeholder="DESCREVA O SERVIÇO"
+                                  rows="1"
+                                  placeholder="CLIQUE PARA EDITAR A DESCRIÇÃO DO SERVIÇO"
+                                  onclick="abrirModalTexto('descricao')"
+                                  onfocus="abrirModalTexto('descricao')"
+                                  readonly
                                   required></textarea>
                     </div>
 
                     <div class="form-group campo-observacao">
                         <label class="form-label" for="observacao">OBSERVAÇÃO</label>
 
-                        <textarea class="form-input auto-expand"
+                        <textarea class="form-input campo-texto-modal"
                                   id="observacao"
                                   th:field="*{observacao}"
-                                  rows="3"
-                                  placeholder="OBSERVAÇÕES ADICIONAIS"></textarea>
+                                  rows="1"
+                                  placeholder="CLIQUE PARA EDITAR A OBSERVAÇÃO"
+                                  onclick="abrirModalTexto('observacao')"
+                                  onfocus="abrirModalTexto('observacao')"
+                                  readonly></textarea>
                     </div>
+
                 </div>
 
-                <div class="filtro-acoes ordem-form-actions">
+                <div class="ordem-form-actions">
                     <button type="submit" class="primary-button" th:if="${modoEdicao != null and modoEdicao}">
                         <i class="bi bi-check-circle"></i>
                         ATUALIZAR ORDEM
@@ -253,6 +290,46 @@
             </form>
         </section>
     </main>
+</div>
+
+<div id="modalTextoOrdem" class="modal-clientes">
+    <div class="modal-clientes-card modal-texto-ordem-card">
+        <div class="page-header">
+            <div>
+                <h2 id="tituloModalTextoOrdem" class="page-title" style="font-size: 1.4rem;">
+                    EDITAR TEXTO
+                </h2>
+                <p class="page-subtitle">
+                    DIGITE O TEXTO COMPLETO SEM DESORGANIZAR A TELA DA ORDEM
+                </p>
+            </div>
+
+            <button type="button" class="secondary-button" onclick="fecharModalTexto()">
+                <i class="bi bi-x-circle"></i>
+                FECHAR
+            </button>
+        </div>
+
+        <input type="hidden" id="campoTextoAtivo">
+
+        <textarea id="editorTextoOrdem"
+                  class="form-input"
+                  rows="14"
+                  style="width: 100%; min-height: 360px; resize: vertical;"
+                  placeholder="Digite o texto aqui"></textarea>
+
+        <div class="filtro-acoes" style="margin-top: 16px; justify-content: flex-end;">
+            <button type="button" class="primary-button" onclick="aplicarTextoModal()">
+                <i class="bi bi-check-circle"></i>
+                APLICAR TEXTO
+            </button>
+
+            <button type="button" class="secondary-button" onclick="fecharModalTexto()">
+                <i class="bi bi-x-circle"></i>
+                CANCELAR
+            </button>
+        </div>
+    </div>
 </div>
 
 <div id="modalClientes" class="modal-clientes">
@@ -299,7 +376,7 @@
                 </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="corpoTabelaClientesModal">
                 <tr th:each="cliente : ${clientesModal}"
                     class="linha-cliente-modal"
                     style="display: none;"
@@ -336,15 +413,555 @@
         </div>
 
         <div class="filtro-acoes" style="margin-top: 14px; justify-content: flex-end;">
-            <a class="secondary-button" th:href="@{/clientes/novo(origem='ordem')}">
+            <button type="button" class="secondary-button" onclick="abrirModalCadastroClienteRapido()">
                 <i class="bi bi-plus-circle"></i>
                 NOVO CLIENTE
-            </a>
+            </button>
         </div>
     </div>
 </div>
 
+<div id="modalCadastroClienteRapido" class="modal-clientes">
+    <div class="modal-clientes-card" style="width: min(900px, 100%);">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title" style="font-size: 1.4rem;">CADASTRAR NOVO CLIENTE</h2>
+                <p class="page-subtitle">CADASTRO RÁPIDO SEM SAIR DA ORDEM DE SERVIÇO</p>
+            </div>
+
+            <button type="button" class="secondary-button" onclick="fecharModalCadastroClienteRapido()">
+                <i class="bi bi-x-circle"></i>
+                FECHAR
+            </button>
+        </div>
+
+        <div id="mensagemClienteRapido" class="alerta alerta-erro" style="display: none;"></div>
+
+        <form id="formClienteRapido" th:action="@{/clientes/salvar-rapido}" method="post">
+            <div class="form-grid" style="grid-template-columns: 1.2fr 0.8fr 1fr; gap: 14px 16px;">
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoNome">NOME</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoNome"
+                           name="nome"
+                           placeholder="Digite o nome do cliente"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoCpf">CPF</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoCpf"
+                           name="cpf"
+                           placeholder="Digite o CPF">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoTelefone">TELEFONE</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoTelefone"
+                           name="telefone"
+                           placeholder="Digite o telefone">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoCelular">CELULAR</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoCelular"
+                           name="celular"
+                           placeholder="Digite o celular">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoCep">CEP</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoCep"
+                           name="cep"
+                           maxlength="9"
+                           inputmode="numeric"
+                           placeholder="00000-000"
+                           oninput="formatarCepClienteRapido(this)"
+                           onblur="buscarEnderecoPorCepClienteRapido()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoCidade">CIDADE</label>
+                    <select class="form-select"
+                            id="clienteRapidoCidade"
+                            name="cidade.idCidade"
+                            required>
+                        <option value="">SELECIONE UMA CIDADE</option>
+                        <option th:each="cidade : ${cidades}"
+                                th:value="${cidade.idCidade}"
+                                th:text="${cidade.nome + ' - ' + cidade.uf}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoEmail">E-MAIL</label>
+                    <input class="form-input"
+                           type="email"
+                           id="clienteRapidoEmail"
+                           name="email"
+                           placeholder="Digite o e-mail">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoEndereco">ENDEREÇO</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoEndereco"
+                           name="endereco"
+                           placeholder="Digite o endereço">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoNumero">NÚMERO</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoNumero"
+                           name="numero"
+                           placeholder="Número">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="clienteRapidoBairro">BAIRRO</label>
+                    <input class="form-input"
+                           type="text"
+                           id="clienteRapidoBairro"
+                           name="bairro"
+                           placeholder="Digite o bairro">
+                </div>
+            </div>
+
+            <div class="filtro-acoes" style="margin-top: 14px; justify-content: flex-end;">
+                <button type="submit" class="primary-button">
+                    <i class="bi bi-check-circle"></i>
+                    SALVAR CLIENTE
+                </button>
+
+                <button type="button" class="secondary-button" onclick="fecharModalCadastroClienteRapido()">
+                    <i class="bi bi-x-circle"></i>
+                    CANCELAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalAlterarSenha" class="modal-senha-overlay">
+    <div class="modal-senha-card">
+        <div class="modal-senha-header">
+            <h2>ALTERAR SENHA</h2>
+
+            <button type="button"
+                    class="modal-senha-fechar"
+                    onclick="fecharModalAlterarSenha()"
+                    aria-label="Fechar janela de alteração de senha">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <form th:action="@{/usuarios/alterar-senha}" method="post" class="modal-senha-form">
+            <div class="form-group">
+                <label class="form-label" for="senhaAtual">SENHA ATUAL</label>
+                <input class="form-input"
+                       type="password"
+                       id="senhaAtual"
+                       name="senhaAtual"
+                       placeholder="Digite sua senha atual"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="novaSenha">NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="novaSenha"
+                       name="novaSenha"
+                       minlength="6"
+                       placeholder="Digite a nova senha"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmacaoSenha">CONFIRMAR NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="confirmacaoSenha"
+                       name="confirmacaoSenha"
+                       minlength="6"
+                       placeholder="Confirme a nova senha"
+                       required>
+            </div>
+
+            <div class="modal-senha-actions">
+                <button type="submit" class="primary-button">
+                    <i class="bi bi-check-circle"></i>
+                    SALVAR SENHA
+                </button>
+
+                <button type="button"
+                        class="secondary-button"
+                        onclick="fecharModalAlterarSenha()">
+                    <i class="bi bi-x-circle"></i>
+                    CANCELAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script th:src="@{/js/sistema.js}"></script>
+
+<script>
+    function abrirModalTexto(tipoCampo) {
+        const campoOriginal = document.getElementById(tipoCampo);
+        const modal = document.getElementById('modalTextoOrdem');
+        const editor = document.getElementById('editorTextoOrdem');
+        const campoAtivo = document.getElementById('campoTextoAtivo');
+        const titulo = document.getElementById('tituloModalTextoOrdem');
+
+        if (!campoOriginal || !modal || !editor || !campoAtivo || !titulo) {
+            return;
+        }
+
+        campoAtivo.value = tipoCampo;
+        editor.value = campoOriginal.value || '';
+
+        if (tipoCampo === 'descricao') {
+            titulo.textContent = 'EDITAR DESCRIÇÃO DO SERVIÇO';
+        } else {
+            titulo.textContent = 'EDITAR OBSERVAÇÃO';
+        }
+
+        modal.classList.add('aberto');
+
+        setTimeout(function () {
+            editor.focus();
+        }, 100);
+    }
+
+    function fecharModalTexto() {
+        const modal = document.getElementById('modalTextoOrdem');
+        const editor = document.getElementById('editorTextoOrdem');
+        const campoAtivo = document.getElementById('campoTextoAtivo');
+
+        if (modal) {
+            modal.classList.remove('aberto');
+        }
+
+        if (editor) {
+            editor.value = '';
+        }
+
+        if (campoAtivo) {
+            campoAtivo.value = '';
+        }
+    }
+
+    function aplicarTextoModal() {
+        const editor = document.getElementById('editorTextoOrdem');
+        const campoAtivo = document.getElementById('campoTextoAtivo');
+
+        if (!editor || !campoAtivo || !campoAtivo.value) {
+            return;
+        }
+
+        const campoOriginal = document.getElementById(campoAtivo.value);
+
+        if (!campoOriginal) {
+            return;
+        }
+
+        campoOriginal.value = editor.value;
+
+        fecharModalTexto();
+    }
+
+    function abrirModalCadastroClienteRapido() {
+        fecharModalClientes();
+
+        const modal = document.getElementById('modalCadastroClienteRapido');
+
+        if (modal) {
+            modal.classList.add('aberto');
+        }
+    }
+
+    function fecharModalCadastroClienteRapido() {
+        const modal = document.getElementById('modalCadastroClienteRapido');
+        const form = document.getElementById('formClienteRapido');
+        const mensagem = document.getElementById('mensagemClienteRapido');
+
+        if (modal) {
+            modal.classList.remove('aberto');
+        }
+
+        if (form) {
+            form.reset();
+        }
+
+        if (mensagem) {
+            mensagem.style.display = 'none';
+            mensagem.textContent = '';
+        }
+    }
+
+    function exibirMensagemClienteRapido(mensagemTexto) {
+        const mensagem = document.getElementById('mensagemClienteRapido');
+
+        if (mensagem) {
+            mensagem.textContent = mensagemTexto;
+            mensagem.style.display = 'flex';
+        }
+    }
+
+    function limparSomenteNumeros(valor) {
+        return (valor || '').replace(/\D/g, '');
+    }
+
+    function normalizarTexto(valor) {
+        return (valor || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toUpperCase();
+    }
+
+    function formatarCepClienteRapido(input) {
+        const numeros = limparSomenteNumeros(input.value).slice(0, 8);
+
+        if (numeros.length > 5) {
+            input.value = numeros.slice(0, 5) + '-' + numeros.slice(5);
+            return;
+        }
+
+        input.value = numeros;
+    }
+
+    function selecionarCidadeClienteRapido(localidade, uf) {
+        const selectCidade = document.getElementById('clienteRapidoCidade');
+
+        if (!selectCidade || !localidade || !uf) {
+            return false;
+        }
+
+        const cidadeBuscada = normalizarTexto(localidade);
+        const ufBuscada = normalizarTexto(uf);
+
+        for (const option of selectCidade.options) {
+            const textoOpcao = normalizarTexto(option.textContent);
+
+            if (textoOpcao.includes(cidadeBuscada) && textoOpcao.endsWith(' - ' + ufBuscada)) {
+                selectCidade.value = option.value;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    async function buscarEnderecoPorCepClienteRapido() {
+        const inputCep = document.getElementById('clienteRapidoCep');
+        const inputEndereco = document.getElementById('clienteRapidoEndereco');
+        const inputBairro = document.getElementById('clienteRapidoBairro');
+
+        if (!inputCep) {
+            return;
+        }
+
+        const cep = limparSomenteNumeros(inputCep.value);
+
+        if (cep.length === 0) {
+            return;
+        }
+
+        if (cep.length !== 8) {
+            exibirMensagemClienteRapido('CEP inválido. Digite 8 números.');
+            return;
+        }
+
+        try {
+            const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const dados = await resposta.json();
+
+            if (!resposta.ok || dados.erro) {
+                exibirMensagemClienteRapido('CEP não encontrado.');
+                return;
+            }
+
+            if (inputEndereco && dados.logradouro) {
+                inputEndereco.value = dados.logradouro;
+            }
+
+            if (inputBairro && dados.bairro) {
+                inputBairro.value = dados.bairro;
+            }
+
+            const cidadeEncontrada = selecionarCidadeClienteRapido(dados.localidade, dados.uf);
+
+            if (!cidadeEncontrada) {
+                exibirMensagemClienteRapido('Cidade do CEP não está cadastrada no sistema. Selecione manualmente.');
+                return;
+            }
+
+            const mensagem = document.getElementById('mensagemClienteRapido');
+
+            if (mensagem) {
+                mensagem.style.display = 'none';
+                mensagem.textContent = '';
+            }
+
+        } catch (erro) {
+            exibirMensagemClienteRapido('Não foi possível consultar o CEP. Selecione a cidade manualmente.');
+        }
+    }
+
+    function adicionarClienteNaTabelaModal(cliente) {
+        const corpoTabela = document.getElementById('corpoTabelaClientesModal');
+
+        if (!corpoTabela || !cliente || !cliente.idCliente) {
+            return;
+        }
+
+        const cidadeTexto = cliente.cidade
+            ? `${cliente.cidade}${cliente.uf ? ' - ' + cliente.uf : ''}`
+            : 'NÃO INFORMADA';
+
+        const linha = document.createElement('tr');
+        linha.className = 'linha-cliente-modal';
+        linha.style.display = 'none';
+        linha.setAttribute(
+            'data-busca',
+            `${cliente.nome || ''} ${cliente.cpf || ''} ${cliente.telefone || ''} ${cliente.celular || ''} ${cidadeTexto}`
+        );
+
+        linha.innerHTML = `
+            <td>${cliente.idCliente}</td>
+            <td>${cliente.nome || ''}</td>
+            <td>${cliente.cpf || 'NÃO INFORMADO'}</td>
+            <td>${cliente.telefone || cliente.celular || 'NÃO INFORMADO'}</td>
+            <td>${cidadeTexto}</td>
+            <td>
+                <button type="button"
+                        class="primary-button"
+                        style="padding: 8px 12px; font-size: 0.85rem;">
+                    <i class="bi bi-check-circle"></i>
+                    SELECIONAR
+                </button>
+            </td>
+        `;
+
+        const botaoSelecionar = linha.querySelector('button');
+        botaoSelecionar.addEventListener('click', function () {
+            selecionarCliente(cliente.idCliente, cliente.nome);
+        });
+
+        const linhaNenhumCliente = document.getElementById('linhaNenhumClienteEncontrado');
+
+        if (linhaNenhumCliente) {
+            corpoTabela.insertBefore(linha, linhaNenhumCliente);
+        } else {
+            corpoTabela.appendChild(linha);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const formClienteRapido = document.getElementById('formClienteRapido');
+
+        if (formClienteRapido) {
+            formClienteRapido.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const cidadeSelecionada = document.getElementById('clienteRapidoCidade');
+
+                if (!cidadeSelecionada || !cidadeSelecionada.value) {
+                    exibirMensagemClienteRapido('Selecione uma cidade para o cliente.');
+                    return;
+                }
+
+                const formData = new FormData(formClienteRapido);
+
+                try {
+                    const resposta = await fetch(formClienteRapido.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const dados = await resposta.json();
+
+                    if (!resposta.ok || !dados.sucesso) {
+                        exibirMensagemClienteRapido(dados.mensagem || 'Não foi possível salvar o cliente.');
+                        return;
+                    }
+
+                    selecionarCliente(dados.idCliente, dados.nome);
+                    adicionarClienteNaTabelaModal(dados);
+                    fecharModalCadastroClienteRapido();
+
+                } catch (erro) {
+                    exibirMensagemClienteRapido('Erro ao salvar o cliente. Verifique os dados e tente novamente.');
+                }
+            });
+        }
+    });
+
+    function abrirModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.add('ativo');
+        }
+    }
+
+    function fecharModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.remove('ativo');
+        }
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            fecharModalTexto();
+            fecharModalAlterarSenha();
+            fecharModalCadastroClienteRapido();
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        const modalSenha = document.getElementById('modalAlterarSenha');
+        const cardSenha = document.querySelector('.modal-senha-card');
+
+        if (modalSenha && cardSenha && modalSenha.classList.contains('ativo')) {
+            const clicouForaDoCardSenha = modalSenha.contains(event.target) && !cardSenha.contains(event.target);
+
+            if (clicouForaDoCardSenha) {
+                fecharModalAlterarSenha();
+            }
+        }
+
+        const modalTexto = document.getElementById('modalTextoOrdem');
+        const cardTexto = document.querySelector('.modal-texto-ordem-card');
+
+        if (modalTexto && cardTexto && modalTexto.classList.contains('aberto')) {
+            const clicouForaDoCardTexto = modalTexto.contains(event.target) && !cardTexto.contains(event.target);
+
+            if (clicouForaDoCardTexto) {
+                fecharModalTexto();
+            }
+        }
+    });
+</script>
 
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function () {

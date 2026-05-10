@@ -111,6 +111,10 @@
                     <p class="page-subtitle" th:if="${origem == 'ordem'}">
                         SELECIONE UM CLIENTE PARA VINCULAR À ORDEM DE SERVIÇO
                     </p>
+
+                    <p class="page-subtitle" th:unless="${origem == 'ordem'}">
+                        VISUALIZAÇÃO DOS ÚLTIMOS 5 CLIENTES CADASTRADOS OU RESULTADO DA BUSCA
+                    </p>
                 </div>
 
                 <a class="primary-button" th:href="@{/clientes/novo(origem=${origem})}">
@@ -119,11 +123,38 @@
                 </a>
             </div>
 
-            <div th:if="${sucesso}" class="alerta alerta-sucesso" th:text="${sucesso}"></div>
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
 
             <div th:if="${erro}" class="alerta alerta-erro">
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                <span th:text="${erro}"></span>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
+
+            <div class="resumo-cards">
+                <div class="resumo-card">
+                    <span class="resumo-label">EXIBINDO</span>
+                    <span class="resumo-valor" th:text="${#lists.size(clientes)}">0</span>
+                    <span class="resumo-texto">REGISTROS NA TELA</span>
+                </div>
+
+                <div class="resumo-card">
+                    <span class="resumo-label">MODO</span>
+
+                    <span class="resumo-valor"
+                          th:if="${filtroSelecionado == null or #strings.isEmpty(filtroSelecionado)}">
+                        ÚLTIMOS 5
+                    </span>
+
+                    <span class="resumo-valor"
+                          th:unless="${filtroSelecionado == null or #strings.isEmpty(filtroSelecionado)}">
+                        BUSCA
+                    </span>
+
+                    <span class="resumo-texto">TIPO DE LISTAGEM</span>
+                </div>
             </div>
 
             <form class="filtro-form" method="get" th:action="@{/clientes}">

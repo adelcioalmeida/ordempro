@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -78,6 +79,35 @@ public class UsuarioController {
         }
 
         return "redirect:/usuarios";
+    }
+
+    @PostMapping("/usuarios/alterar-senha")
+    public String alterarSenhaDoUsuarioLogado(@RequestParam String senhaAtual,
+                                              @RequestParam String novaSenha,
+                                              @RequestParam String confirmacaoSenha,
+                                              Authentication authentication,
+                                              RedirectAttributes redirectAttributes) {
+        if (authentication == null || authentication.getName() == null) {
+            redirectAttributes.addFlashAttribute("erro", "Usuário não autenticado.");
+            return "redirect:/login";
+        }
+
+        String emailUsuarioLogado = authentication.getName();
+
+        try {
+            usuarioService.alterarSenhaDoUsuarioLogado(
+                    emailUsuarioLogado,
+                    senhaAtual,
+                    novaSenha,
+                    confirmacaoSenha
+            );
+
+            redirectAttributes.addFlashAttribute("sucesso", "Senha alterada com sucesso.");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("erro", exception.getMessage());
+        }
+
+        return "redirect:/ordens";
     }
 
     @GetMapping("/usuarios/excluir/{id}")

@@ -1,5 +1,7 @@
 package br.com.ordempro.dto;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
 
 public class OrdemServicoFormDTO {
@@ -8,8 +10,13 @@ public class OrdemServicoFormDTO {
     private Long idItem;
     private Long idCliente;
     private Long idServico;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dataAbertura;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dataPrevistaConclusao;
+
     private String status;
     private String observacao;
     private String descricao;

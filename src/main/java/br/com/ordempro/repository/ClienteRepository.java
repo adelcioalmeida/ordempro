@@ -15,22 +15,34 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     @EntityGraph(attributePaths = "cidade")
     Optional<Cliente> findById(Long id);
 
-    @Override
     @EntityGraph(attributePaths = "cidade")
-    List<Cliente> findAll();
+    List<Cliente> findAllByAtivoTrue();
+
+    @EntityGraph(attributePaths = "cidade")
+    List<Cliente> findTop5ByAtivoTrueOrderByIdClienteDesc();
 
     @EntityGraph(attributePaths = "cidade")
     @Query("""
             SELECT c
             FROM Cliente c
             LEFT JOIN c.cidade cidade
-            WHERE (:filtro IS NULL OR :filtro = ''
-                OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :filtro, '%'))
-                OR LOWER(c.cpf) LIKE LOWER(CONCAT('%', :filtro, '%'))
-                OR LOWER(cidade.nome) LIKE LOWER(CONCAT('%', :filtro, '%')))
+            WHERE c.ativo = true
+              AND (
+                    :filtroTexto IS NULL
+                    OR :filtroTexto = ''
+                    OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :filtroTexto, '%'))
+                    OR LOWER(c.email) LIKE LOWER(CONCAT('%', :filtroTexto, '%'))
+                    OR LOWER(cidade.nome) LIKE LOWER(CONCAT('%', :filtroTexto, '%'))
+                    OR (:filtroNumerico IS NOT NULL AND :filtroNumerico <> '' AND c.cpf LIKE CONCAT('%', :filtroNumerico, '%'))
+                    OR (:filtroNumerico IS NOT NULL AND :filtroNumerico <> '' AND c.telefone LIKE CONCAT('%', :filtroNumerico, '%'))
+                    OR (:filtroNumerico IS NOT NULL AND :filtroNumerico <> '' AND c.celular LIKE CONCAT('%', :filtroNumerico, '%'))
+              )
             ORDER BY c.idCliente DESC
             """)
-    List<Cliente> buscarComFiltro(@Param("filtro") String filtro);
+    List<Cliente> buscarComFiltroAtivos(
+            @Param("filtroTexto") String filtroTexto,
+            @Param("filtroNumerico") String filtroNumerico
+    );
 
     boolean existsByCidade_IdCidade(Long idCidade);
 }

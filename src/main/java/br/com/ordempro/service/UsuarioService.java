@@ -12,6 +12,8 @@ import java.util.List;
 @Service
 public class UsuarioService {
 
+    private static final int TAMANHO_MINIMO_SENHA = 6;
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -71,6 +73,61 @@ public class UsuarioService {
         }
 
         return usuarioRepository.save(usuario);
+    }
+
+    public void alterarSenhaDoUsuarioLogado(String emailUsuarioLogado,
+                                            String senhaAtual,
+                                            String novaSenha,
+                                            String confirmacaoSenha) {
+        validarCamposAlteracaoSenha(emailUsuarioLogado, senhaAtual, novaSenha, confirmacaoSenha);
+
+        Usuario usuario = buscarPorEmail(emailUsuarioLogado);
+
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuário logado não encontrado.");
+        }
+
+        boolean senhaAtualCorreta = passwordEncoder.matches(senhaAtual, usuario.getSenhaHash());
+
+        if (!senhaAtualCorreta) {
+            throw new IllegalArgumentException("A senha atual informada está incorreta.");
+        }
+
+        usuario.setSenhaHash(passwordEncoder.encode(novaSenha));
+        usuarioRepository.save(usuario);
+    }
+
+    private void validarCamposAlteracaoSenha(String emailUsuarioLogado,
+                                             String senhaAtual,
+                                             String novaSenha,
+                                             String confirmacaoSenha) {
+        if (emailUsuarioLogado == null || emailUsuarioLogado.isBlank()) {
+            throw new IllegalArgumentException("Não foi possível identificar o usuário logado.");
+        }
+
+        if (senhaAtual == null || senhaAtual.isBlank()) {
+            throw new IllegalArgumentException("Informe a senha atual.");
+        }
+
+        if (novaSenha == null || novaSenha.isBlank()) {
+            throw new IllegalArgumentException("Informe a nova senha.");
+        }
+
+        if (confirmacaoSenha == null || confirmacaoSenha.isBlank()) {
+            throw new IllegalArgumentException("Confirme a nova senha.");
+        }
+
+        if (novaSenha.length() < TAMANHO_MINIMO_SENHA) {
+            throw new IllegalArgumentException("A nova senha deve ter pelo menos 6 caracteres.");
+        }
+
+        if (!novaSenha.equals(confirmacaoSenha)) {
+            throw new IllegalArgumentException("A nova senha e a confirmação não conferem.");
+        }
+
+        if (senhaAtual.equals(novaSenha)) {
+            throw new IllegalArgumentException("A nova senha deve ser diferente da senha atual.");
+        }
     }
 
     public void excluirPorId(Long id) {

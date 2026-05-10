@@ -79,21 +79,27 @@
         </nav>
 
         <div class="sidebar-user-card">
-            <div class="sidebar-user-info">
-                <i class="bi bi-person-circle"></i>
+            <button type="button"
+                    class="sidebar-user-button"
+                    onclick="abrirModalAlterarSenha()"
+                    title="Alterar minha senha">
+                <div class="sidebar-user-info">
+                    <i class="bi bi-person-circle"></i>
 
-                <div>
-                    <span class="sidebar-user-name"
-                          th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
-                        USUÁRIO • PERFIL
-                    </span>
+                    <div>
+                        <span class="sidebar-user-name"
+                              th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                            USUÁRIO • PERFIL
+                        </span>
 
-                    <span class="sidebar-user-profile">
-                        Perfil:
-                        <strong th:text="${usuarioLogadoPerfil}">PERFIL</strong>
-                    </span>
+                        <span class="sidebar-user-profile">
+                            Clique para alterar senha
+                        </span>
+                    </div>
                 </div>
-            </div>
+
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
         </div>
     </aside>
 
@@ -106,6 +112,11 @@
                         th:text="${usuario.idUsuario != null ? 'EDIÇÃO DE USUÁRIO' : 'CADASTRO DE USUÁRIO'}">
                         CADASTRO DE USUÁRIO
                     </h1>
+
+                    <p class="page-subtitle"
+                       th:text="${usuario.idUsuario != null ? 'ATUALIZE OS DADOS DO USUÁRIO DO SISTEMA' : 'PREENCHA OS DADOS PARA CADASTRAR UM NOVO USUÁRIO'}">
+                        PREENCHA OS DADOS PARA CADASTRAR UM NOVO USUÁRIO
+                    </p>
                 </div>
 
                 <a class="secondary-button" th:href="@{/usuarios}">
@@ -114,81 +125,95 @@
                 </a>
             </div>
 
-            <form th:action="@{/usuarios/salvar}" th:object="${usuario}" method="post">
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
+
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
+
+            <form th:action="@{/usuarios/salvar}" th:object="${usuario}" method="post" class="filtro-form">
                 <input type="hidden" th:field="*{idUsuario}">
 
-                <div class="form-grid">
+                <div class="form-section">
+                    <h2 class="section-title">DADOS DO USUÁRIO</h2>
 
-                    <div class="form-group">
-                        <label class="form-label" for="nome">NOME COMPLETO</label>
-                        <input class="form-input"
-                               type="text"
-                               id="nome"
-                               th:field="*{nome}"
-                               placeholder="Digite o nome do usuário"
-                               required>
-                    </div>
+                    <div class="form-grid">
 
-                    <div class="form-group">
-                        <label class="form-label" for="email">E-MAIL</label>
-                        <input class="form-input"
-                               type="email"
-                               id="email"
-                               th:field="*{email}"
-                               placeholder="Digite o e-mail"
-                               required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="telefone">TELEFONE</label>
-                        <input class="form-input"
-                               type="text"
-                               id="telefone"
-                               th:field="*{telefone}"
-                               inputmode="numeric"
-                               maxlength="15"
-                               placeholder="(00) 00000-0000">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="senhaHash">SENHA</label>
-
-                        <div class="senha-wrapper">
-                            <input class="form-input campo-senha"
-                                   type="password"
-                                   id="senhaHash"
-                                   th:field="*{senhaHash}"
-                                   th:placeholder="${usuario.idUsuario != null ? 'Deixe em branco para manter a senha atual' : 'Digite a senha'}">
-
-                            <button type="button"
-                                    class="botao-olho"
-                                    onclick="toggleSenha()"
-                                    aria-label="Mostrar ou ocultar senha">
-                                <i id="iconeSenha" class="bi bi-eye"></i>
-                            </button>
+                        <div class="form-group">
+                            <label class="form-label" for="nome">NOME COMPLETO</label>
+                            <input class="form-input"
+                                   type="text"
+                                   id="nome"
+                                   th:field="*{nome}"
+                                   placeholder="Digite o nome do usuário"
+                                   required>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="funcao">FUNÇÃO</label>
+                        <div class="form-group">
+                            <label class="form-label" for="email">E-MAIL</label>
+                            <input class="form-input"
+                                   type="email"
+                                   id="email"
+                                   th:field="*{email}"
+                                   placeholder="Digite o e-mail"
+                                   required>
+                        </div>
 
-                        <select class="form-select" id="funcao" th:field="*{funcao}" required>
-                            <option value="">SELECIONE UMA FUNÇÃO</option>
+                        <div class="form-group">
+                            <label class="form-label" for="telefone">TELEFONE</label>
+                            <input class="form-input"
+                                   type="text"
+                                   id="telefone"
+                                   th:field="*{telefone}"
+                                   inputmode="numeric"
+                                   maxlength="15"
+                                   placeholder="(00) 00000-0000">
+                        </div>
 
-                            <option th:each="funcao : ${funcoes}"
-                                    th:value="${funcao.idFuncao}"
-                                    th:text="${funcao.nome}">
-                            </option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label class="form-label" for="senhaHash">SENHA</label>
 
-                    <div class="form-group">
-                        <label class="form-label" for="ativo">STATUS</label>
+                            <div class="senha-wrapper">
+                                <input class="form-input campo-senha"
+                                       type="password"
+                                       id="senhaHash"
+                                       th:field="*{senhaHash}"
+                                       th:placeholder="${usuario.idUsuario != null ? 'Deixe em branco para manter a senha atual' : 'Digite a senha'}">
 
-                        <select class="form-select" id="ativo" th:field="*{ativo}">
-                            <option th:value="true">ATIVO</option>
-                            <option th:value="false">INATIVO</option>
-                        </select>
+                                <button type="button"
+                                        class="botao-olho"
+                                        onclick="toggleSenha()"
+                                        aria-label="Mostrar ou ocultar senha">
+                                    <i id="iconeSenha" class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="funcao">FUNÇÃO</label>
+
+                            <select class="form-select" id="funcao" th:field="*{funcao}" required>
+                                <option value="">SELECIONE UMA FUNÇÃO</option>
+
+                                <option th:each="funcao : ${funcoes}"
+                                        th:value="${funcao.idFuncao}"
+                                        th:text="${funcao.nome}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="ativo">STATUS</label>
+
+                            <select class="form-select" id="ativo" th:field="*{ativo}">
+                                <option th:value="true">ATIVO</option>
+                                <option th:value="false">INATIVO</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -210,6 +235,106 @@
         </section>
     </main>
 </div>
+
+<div id="modalAlterarSenha" class="modal-senha-overlay">
+    <div class="modal-senha-card">
+        <div class="modal-senha-header">
+            <h2>ALTERAR SENHA</h2>
+
+            <button type="button"
+                    class="modal-senha-fechar"
+                    onclick="fecharModalAlterarSenha()"
+                    aria-label="Fechar janela de alteração de senha">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <form th:action="@{/usuarios/alterar-senha}" method="post" class="modal-senha-form">
+            <div class="form-group">
+                <label class="form-label" for="senhaAtual">SENHA ATUAL</label>
+                <input class="form-input"
+                       type="password"
+                       id="senhaAtual"
+                       name="senhaAtual"
+                       placeholder="Digite sua senha atual"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="novaSenha">NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="novaSenha"
+                       name="novaSenha"
+                       minlength="6"
+                       placeholder="Digite a nova senha"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmacaoSenha">CONFIRMAR NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="confirmacaoSenha"
+                       name="confirmacaoSenha"
+                       minlength="6"
+                       placeholder="Confirme a nova senha"
+                       required>
+            </div>
+
+            <div class="modal-senha-actions">
+                <button type="submit" class="primary-button">
+                    <i class="bi bi-check-circle"></i>
+                    SALVAR SENHA
+                </button>
+
+                <button type="button"
+                        class="secondary-button"
+                        onclick="fecharModalAlterarSenha()">
+                    <i class="bi bi-x-circle"></i>
+                    CANCELAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.add('ativo');
+        }
+    }
+
+    function fecharModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.remove('ativo');
+        }
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            fecharModalAlterarSenha();
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        const modal = document.getElementById('modalAlterarSenha');
+        const card = document.querySelector('.modal-senha-card');
+
+        if (modal && card && modal.classList.contains('ativo')) {
+            const clicouForaDoCard = modal.contains(event.target) && !card.contains(event.target);
+
+            if (clicouForaDoCard) {
+                fecharModalAlterarSenha();
+            }
+        }
+    });
+</script>
 
 <script th:src="@{/js/sistema.js}"></script>
 </body>

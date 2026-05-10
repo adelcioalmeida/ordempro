@@ -4,14 +4,22 @@
     padding: 0;
 }
 
+html,
+body {
+    min-height: 100vh;
+}
+
 body {
     min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #1f3c49, #346171, #538090);
+    background: linear-gradient(135deg, #eef6fa 0%, #dcecf3 45%, #c9e0ea 100%);
+    background-attachment: fixed;
+    background-size: cover;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
+    color: #1f2937;
 }
 
 .login-container {
@@ -24,29 +32,31 @@ body {
 .login-card {
     width: 100%;
     max-width: 430px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(249, 251, 253, 0.98);
     border-radius: 18px;
-    padding: 34px 30px;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    padding: 28px 30px 34px;
+    box-shadow: 0 16px 36px rgba(15, 48, 68, 0.16);
+    border: 1px solid rgba(207, 216, 227, 0.9);
 }
 
 .login-logo {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 22px;
+    margin-bottom: 16px;
 }
 
 .login-logo img {
-    width: 230px;
+    width: 270px;
     max-width: 100%;
     height: auto;
+    filter: drop-shadow(0 4px 6px rgba(15, 48, 68, 0.18));
 }
 
 .login-card h1 {
     text-align: center;
     font-size: 2rem;
-    color: #1e3a4a;
+    color: #123044;
     margin-bottom: 24px;
     text-transform: uppercase;
 }
@@ -77,6 +87,7 @@ body {
     font-size: 0.95rem;
     outline: none;
     background-color: #ffffff;
+    color: #111827;
 }
 
 .form-group input:focus {
@@ -108,7 +119,8 @@ body {
     font-size: 1rem;
     text-transform: uppercase;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
 }
 
 .login-button:hover {

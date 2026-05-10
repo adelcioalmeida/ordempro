@@ -1,5 +1,6 @@
 package br.com.ordempro.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +35,9 @@ public class Cliente {
     private String numero;
     private String bairro;
     private String cep;
+
+    @Column(name = "ativo", nullable = false)
+    private Boolean ativo = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cidade")
