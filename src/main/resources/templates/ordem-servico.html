@@ -186,6 +186,62 @@
                         </select>
                     </div>
 
+                    <div class="form-group campo-valor">
+                        <label class="form-label" for="valor">VALOR</label>
+
+                        <input class="form-input"
+                               type="text"
+                               id="valor"
+                               th:field="*{valor}"
+                               inputmode="numeric"
+                               placeholder="0,00">
+                    </div>
+
+                    <div class="form-group campo-descricao-servico">
+                        <label class="form-label" for="descricao">DESCRIÇÃO DO SERVIÇO</label>
+
+                        <textarea class="form-input campo-texto-modal"
+                                  id="descricao"
+                                  th:field="*{descricao}"
+                                  rows="4"
+                                  placeholder="CLIQUE PARA EDITAR A DESCRIÇÃO DO SERVIÇO"
+                                  onclick="abrirModalTexto('descricao')"
+                                  onfocus="abrirModalTexto('descricao')"
+                                  readonly
+                                  required></textarea>
+                    </div>
+
+                    <div class="form-group campo-observacao">
+                        <label class="form-label" for="observacao">OBSERVAÇÃO</label>
+
+                        <textarea class="form-input campo-texto-modal"
+                                  id="observacao"
+                                  th:field="*{observacao}"
+                                  rows="4"
+                                  placeholder="CLIQUE PARA EDITAR A OBSERVAÇÃO"
+                                  onclick="abrirModalTexto('observacao')"
+                                  onfocus="abrirModalTexto('observacao')"
+                                  readonly></textarea>
+                    </div>
+
+                    <div class="form-group campo-data-abertura">
+                        <label class="form-label" for="dataAbertura">DATA DE ABERTURA</label>
+
+                        <input class="form-input data-input"
+                               type="date"
+                               id="dataAbertura"
+                               th:field="*{dataAbertura}">
+                    </div>
+
+                    <div class="form-group campo-data-previsao">
+                        <label class="form-label" for="dataPrevistaConclusao">PREVISÃO DE CONCLUSÃO</label>
+
+                        <input class="form-input data-input"
+                               type="date"
+                               id="dataPrevistaConclusao"
+                               th:field="*{dataPrevistaConclusao}">
+                    </div>
+
                     <div class="form-group campo-status">
                         <label class="form-label" for="status">STATUS</label>
 
@@ -213,61 +269,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group campo-valor">
-                        <label class="form-label" for="valor">VALOR</label>
-
-                        <input class="form-input"
-                               type="text"
-                               id="valor"
-                               th:field="*{valor}"
-                               inputmode="numeric"
-                               placeholder="0,00">
-                    </div>
-
-                    <div class="form-group campo-data-abertura">
-                        <label class="form-label" for="dataAbertura">DATA DE ABERTURA</label>
-
-                        <input class="form-input data-input"
-                               type="datetime-local"
-                               id="dataAbertura"
-                               th:field="*{dataAbertura}">
-                    </div>
-
-                    <div class="form-group campo-data-previsao">
-                        <label class="form-label" for="dataPrevistaConclusao">PREVISÃO DE CONCLUSÃO</label>
-
-                        <input class="form-input data-input"
-                               type="datetime-local"
-                               id="dataPrevistaConclusao"
-                               th:field="*{dataPrevistaConclusao}">
-                    </div>
-
-                    <div class="form-group campo-descricao-servico">
-                        <label class="form-label" for="descricao">DESCRIÇÃO DO SERVIÇO</label>
-
-                        <textarea class="form-input campo-texto-modal"
-                                  id="descricao"
-                                  th:field="*{descricao}"
-                                  rows="1"
-                                  placeholder="CLIQUE PARA EDITAR A DESCRIÇÃO DO SERVIÇO"
-                                  onclick="abrirModalTexto('descricao')"
-                                  onfocus="abrirModalTexto('descricao')"
-                                  readonly
-                                  required></textarea>
-                    </div>
-
-                    <div class="form-group campo-observacao">
-                        <label class="form-label" for="observacao">OBSERVAÇÃO</label>
-
-                        <textarea class="form-input campo-texto-modal"
-                                  id="observacao"
-                                  th:field="*{observacao}"
-                                  rows="1"
-                                  placeholder="CLIQUE PARA EDITAR A OBSERVAÇÃO"
-                                  onclick="abrirModalTexto('observacao')"
-                                  onfocus="abrirModalTexto('observacao')"
-                                  readonly></textarea>
-                    </div>
 
                 </div>
 
@@ -972,6 +973,37 @@
             selecionarCliente(idCliente, nomeCliente);
         }
     });
+</script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const campoDataAbertura =
+            document.getElementById("dataAbertura");
+
+        if (
+            campoDataAbertura &&
+            !campoDataAbertura.value
+        ) {
+
+            const agora = new Date();
+
+            const ano = agora.getFullYear();
+
+            const mes = String(
+                agora.getMonth() + 1
+            ).padStart(2, '0');
+
+            const dia = String(
+                agora.getDate()
+            ).padStart(2, '0');
+
+            campoDataAbertura.value =
+                `${ano}-${mes}-${dia}`;
+        }
+    });
+
 </script>
 
 </body>

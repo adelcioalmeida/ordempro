@@ -15,6 +15,7 @@ import java.util.List;
 public class OrdemServicoService {
 
     private static final String STATUS_CANCELADA = "CANCELADA";
+    private static final String STATUS_ABERTA = "ABERTA";
 
     private final OrdemServicoRepository ordemServicoRepository;
     private final ItemOrdemServicoRepository itemRepository;
@@ -44,6 +45,11 @@ public class OrdemServicoService {
                 normalizarFiltro(cliente),
                 normalizarFiltro(servico)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public long contarOrdensAbertas() {
+        return ordemServicoRepository.countByStatusIgnoreCase(STATUS_ABERTA);
     }
 
     public OrdemServico salvar(OrdemServico ordemServico) {

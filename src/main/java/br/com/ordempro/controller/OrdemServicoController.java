@@ -78,6 +78,7 @@ public class OrdemServicoController {
     ) {
         OrdemServicoFormDTO form = new OrdemServicoFormDTO();
         form.setStatus(STATUS_ABERTA);
+        form.setDataAbertura(LocalDateTime.now().toLocalDate());
 
         if (idCliente != null) {
             form.setIdCliente(idCliente);
@@ -117,8 +118,15 @@ public class OrdemServicoController {
         OrdemServicoFormDTO form = new OrdemServicoFormDTO();
         form.setIdOs(ordemServico.getIdOs());
         form.setIdCliente(ordemServico.getCliente() != null ? ordemServico.getCliente().getIdCliente() : null);
-        form.setDataAbertura(ordemServico.getDataAbertura());
-        form.setDataPrevistaConclusao(ordemServico.getDataPrevistaConclusao());
+
+        if (ordemServico.getDataAbertura() != null) {
+            form.setDataAbertura(ordemServico.getDataAbertura().toLocalDate());
+        }
+
+        if (ordemServico.getDataPrevistaConclusao() != null) {
+            form.setDataPrevistaConclusao(ordemServico.getDataPrevistaConclusao().toLocalDate());
+        }
+
         form.setStatus(ordemServico.getStatus());
         form.setObservacao(ordemServico.getObservacao());
         form.setValor(formatarValorParaFormulario(ordemServico.getValorTotal()));
@@ -207,10 +215,22 @@ public class OrdemServicoController {
             ordemServico.setStatus(form.getStatus());
         }
 
-        ordemServico.setDataAbertura(
-                form.getDataAbertura() != null ? form.getDataAbertura() : LocalDateTime.now()
-        );
-        ordemServico.setDataPrevistaConclusao(form.getDataPrevistaConclusao());
+        LocalDateTime dataAbertura;
+
+        if (form.getDataAbertura() != null) {
+            dataAbertura = form.getDataAbertura().atTime(LocalDateTime.now().toLocalTime());
+        } else {
+            dataAbertura = LocalDateTime.now();
+        }
+
+        ordemServico.setDataAbertura(dataAbertura);
+
+        if (form.getDataPrevistaConclusao() != null) {
+            ordemServico.setDataPrevistaConclusao(form.getDataPrevistaConclusao().atStartOfDay());
+        } else {
+            ordemServico.setDataPrevistaConclusao(null);
+        }
+
         ordemServico.setObservacao(form.getObservacao());
         ordemServico.setValorTotal(valor);
 
@@ -263,22 +283,47 @@ public class OrdemServicoController {
 
     @GetMapping("/ordens")
     public String listarOrdens(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String cliente,
-            @RequestParam(required = false) String servico,
+            @RequestParam(required = false) String termoBusca,
+            @RequestParam(required = false) java.util.List<String> filtros,
             Model model
     ) {
-        boolean semFiltros = isVazio(status) && isVazio(cliente) && isVazio(servico);
+        String status = null;
+        String cliente = null;
+        String servico = null;
 
-        if (semFiltros) {
-            model.addAttribute("ordens", ordemServicoService.listarUltimas5());
-        } else {
-            model.addAttribute("ordens", ordemServicoService.buscarComFiltros(status, cliente, servico));
+        if (filtros != null && termoBusca != null && !termoBusca.isBlank()) {
+            if (filtros.contains("status")) {
+                status = termoBusca;
+            }
+
+            if (filtros.contains("cliente")) {
+                cliente = termoBusca;
+            }
+
+            if (filtros.contains("servico")) {
+                servico = termoBusca;
+            }
         }
 
-        model.addAttribute("statusSelecionado", status);
-        model.addAttribute("clienteSelecionado", cliente);
-        model.addAttribute("servicoSelecionado", servico);
+        boolean semFiltros =
+                (filtros == null || filtros.isEmpty())
+                        || termoBusca == null
+                        || termoBusca.isBlank();
+
+        java.util.List<OrdemServico> ordens;
+
+        if (semFiltros) {
+            ordens = ordemServicoService.listarUltimas5();
+        } else {
+            ordens = ordemServicoService.buscarComFiltros(status, cliente, servico);
+        }
+
+        model.addAttribute("ordens", ordens);
+        model.addAttribute("totalOrdens", ordemServicoService.listarTodas().size());
+        model.addAttribute("totalClientes", clienteService.listarTodos().size());
+        model.addAttribute("ordensAbertas", ordemServicoService.buscarComFiltros("ABERTA", null, null).size());
+        model.addAttribute("termoBusca", termoBusca);
+        model.addAttribute("filtrosSelecionados", filtros);
         model.addAttribute("ordemService", ordemServicoService);
 
         return "ordens-lista";
@@ -358,10 +403,6 @@ public class OrdemServicoController {
         }
 
         return valor.toString().replace(".", ",");
-    }
-
-    private boolean isVazio(String valor) {
-        return valor == null || valor.isBlank();
     }
 
     private OrdemServico obterOuCriarOrdemServico(OrdemServicoFormDTO form) {

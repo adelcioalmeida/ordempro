@@ -134,11 +134,13 @@
 
                 <div class="form-grid cliente-form-grid cliente-form-grid-ajustado">
 
+                    <!-- NOME -->
                     <div class="form-group campo-nome-ajustado">
                         <label class="form-label">NOME</label>
                         <input type="text" th:field="*{nome}" class="form-input" required>
                     </div>
 
+                    <!-- CPF + DATA -->
                     <div class="form-group campo-cpf-menor">
                         <label class="form-label">CPF</label>
                         <input type="text"
@@ -154,6 +156,7 @@
                         <input type="date" th:field="*{dataNascimento}" class="form-input">
                     </div>
 
+                    <!-- TELEFONE + CELULAR -->
                     <div class="form-group campo-telefone-menor">
                         <label class="form-label">TELEFONE</label>
                         <input type="text"
@@ -174,14 +177,7 @@
                                placeholder="(00) 00000-0000">
                     </div>
 
-                    <div class="form-group campo-email-ajustado">
-                        <label class="form-label">E-MAIL</label>
-                        <input type="email"
-                               th:field="*{email}"
-                               class="form-input"
-                               placeholder="cliente@email.com">
-                    </div>
-
+                    <!-- CEP + CIDADE + UF -->
                     <div class="form-group campo-cep-menor">
                         <label class="form-label">CEP</label>
                         <input type="text"
@@ -220,6 +216,7 @@
                         <input type="text" id="ufCliente" class="form-input" readonly placeholder="UF">
                     </div>
 
+                    <!-- ENDEREÇO + NÚMERO + BAIRRO -->
                     <div class="form-group campo-endereco-maior">
                         <label class="form-label">ENDEREÇO</label>
                         <input type="text" th:field="*{endereco}" class="form-input">
@@ -233,6 +230,15 @@
                     <div class="form-group campo-bairro-ajustado">
                         <label class="form-label">BAIRRO</label>
                         <input type="text" th:field="*{bairro}" class="form-input">
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="form-group campo-email-ajustado">
+                        <label class="form-label">E-MAIL</label>
+                        <input type="email"
+                               th:field="*{email}"
+                               class="form-input"
+                               placeholder="cliente@email.com">
                     </div>
 
                 </div>

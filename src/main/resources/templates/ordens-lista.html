@@ -76,6 +76,13 @@
                 </div>
             </div>
 
+            <div class="menu-group">
+                <button type="button" class="menu-toggle" onclick="abrirModalRelatorios()">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    RELATÓRIOS
+                </button>
+            </div>
+
             <a class="sidebar-link sair-link" th:href="@{/logout}">
                 <i class="bi bi-box-arrow-right"></i>
                 SAIR
@@ -136,74 +143,87 @@
             </div>
 
             <div class="resumo-cards">
+
                 <div class="resumo-card">
-                    <span class="resumo-label">EXIBINDO</span>
-                    <strong class="resumo-valor" th:text="${#lists.size(ordens)}">0</strong>
-                    <span class="resumo-texto">REGISTROS NA TELA</span>
+                    <span class="resumo-label">TOTAL DE ORDENS</span>
+
+                    <strong class="resumo-valor"
+                            th:text="${totalOrdens}">
+                        0
+                    </strong>
+
+                    <span class="resumo-texto">
+            ORDENS CADASTRADAS
+        </span>
                 </div>
 
                 <div class="resumo-card">
-                    <span class="resumo-label">MODO</span>
+                    <span class="resumo-label">TOTAL DE CLIENTES</span>
+
                     <strong class="resumo-valor"
-                            th:text="${(statusSelecionado == null or statusSelecionado == '')
-                                    and (clienteSelecionado == null or clienteSelecionado == '')
-                                    and (servicoSelecionado == null or servicoSelecionado == '')
-                                    ? 'ÚLTIMAS 5' : 'FILTRO'}">
-                        ÚLTIMAS 5
+                            th:text="${totalClientes}">
+                        0
                     </strong>
-                    <span class="resumo-texto">TIPO DE LISTAGEM</span>
+
+                    <span class="resumo-texto">
+            CLIENTES CADASTRADOS
+        </span>
                 </div>
+
+                <div class="resumo-card">
+                    <span class="resumo-label">ORDENS ABERTAS</span>
+
+                    <strong class="resumo-valor"
+                            th:text="${ordensAbertas}">
+                        0
+                    </strong>
+
+                    <span class="resumo-texto">
+            AGUARDANDO FINALIZAÇÃO
+        </span>
+                </div>
+
             </div>
 
             <form method="get" th:action="@{/ordens}" class="filtro-form">
-                <div class="filtro-grid">
+                <div class="filtro-box-personalizado">
 
-                    <div class="form-group">
-                        <label class="form-label" for="status">STATUS</label>
-                        <select class="form-select" id="status" name="status">
-                            <option value="">TODOS</option>
-                            <option value="ABERTA" th:selected="${statusSelecionado == 'ABERTA'}">ABERTA</option>
-                            <option value="EM_ANDAMENTO" th:selected="${statusSelecionado == 'EM_ANDAMENTO'}">EM ANDAMENTO</option>
-                            <option value="FINALIZADA" th:selected="${statusSelecionado == 'FINALIZADA'}">FINALIZADA</option>
-                            <option value="CANCELADA" th:selected="${statusSelecionado == 'CANCELADA'}">CANCELADA</option>
-                        </select>
+                    <div class="filtro-checkbox-group">
+                        <label class="checkbox-filtro">
+                            <input type="checkbox" id="filtroStatus" name="filtros" value="status">
+                            STATUS
+                        </label>
+
+                        <label class="checkbox-filtro">
+                            <input type="checkbox" id="filtroCliente" name="filtros" value="cliente">
+                            CLIENTE
+                        </label>
+
+                        <label class="checkbox-filtro">
+                            <input type="checkbox" id="filtroServico" name="filtros" value="servico">
+                            SERVIÇO
+                        </label>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="cliente">CLIENTE</label>
+                    <div class="filtro-busca-unica">
                         <input class="form-input"
                                type="text"
-                               id="cliente"
-                               name="cliente"
-                               placeholder="DIGITE O NOME DO CLIENTE"
-                               th:value="${clienteSelecionado}">
+                               id="termoBusca"
+                               name="termoBusca"
+                               placeholder="DIGITE O TERMO DA BUSCA"
+                               autocomplete="off">
+
+                        <button type="submit" class="primary-button filtro-botao-pequeno">
+                            <i class="bi bi-search"></i>
+                            BUSCAR
+                        </button>
+
+                        <a class="secondary-button filtro-botao-pequeno" th:href="@{/ordens}">
+                            <i class="bi bi-eraser"></i>
+                            LIMPAR
+                        </a>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="servico">SERVIÇO</label>
-                        <input class="form-input"
-                               type="text"
-                               id="servico"
-                               name="servico"
-                               placeholder="DIGITE O SERVIÇO"
-                               th:value="${servicoSelecionado}">
-                    </div>
-
-                    <div class="form-group filtro-botoes">
-                        <label class="form-label label-invisivel">AÇÃO</label>
-
-                        <div class="filtro-acoes">
-                            <button type="submit" class="primary-button">
-                                <i class="bi bi-search"></i>
-                                BUSCAR
-                            </button>
-
-                            <a class="secondary-button" th:href="@{/ordens}">
-                                <i class="bi bi-eraser"></i>
-                                LIMPAR
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </form>
 
@@ -435,6 +455,47 @@
     </div>
 </div>
 
+<div id="modalRelatorios" class="modal-senha-overlay">
+    <div class="modal-senha-card">
+
+        <div class="modal-senha-header">
+            <h2>RELATÓRIOS</h2>
+
+            <button type="button"
+                    class="modal-senha-fechar"
+                    onclick="fecharModalRelatorios()"
+                    aria-label="Fechar janela de relatórios">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="modal-relatorios-opcoes" style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
+
+            <a class="submenu-link" th:href="@{/ordens}">
+                <i class="bi bi-list-check"></i>
+                ORDENS POR STATUS
+            </a>
+
+            <a class="submenu-link" th:href="@{/ordens}">
+                <i class="bi bi-person-lines-fill"></i>
+                ORDENS POR CLIENTE
+            </a>
+
+            <a class="submenu-link" th:href="@{/ordens}">
+                <i class="bi bi-calendar-event"></i>
+                ORDENS POR PERÍODO
+            </a>
+
+            <a class="submenu-link" th:href="@{/ordens}">
+                <i class="bi bi-cash-stack"></i>
+                VALOR TOTAL DAS ORDENS
+            </a>
+
+        </div>
+
+    </div>
+</div>
+
 <script>
     function abrirModalAlterarSenha() {
         const modal = document.getElementById('modalAlterarSenha');
@@ -452,21 +513,50 @@
         }
     }
 
+    function abrirModalRelatorios() {
+        const modal = document.getElementById('modalRelatorios');
+
+        if (modal) {
+            modal.classList.add('ativo');
+        }
+    }
+
+    function fecharModalRelatorios() {
+        const modal = document.getElementById('modalRelatorios');
+
+        if (modal) {
+            modal.classList.remove('ativo');
+        }
+    }
+
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             fecharModalAlterarSenha();
+            fecharModalRelatorios();
         }
     });
 
     document.addEventListener('click', function (event) {
-        const modal = document.getElementById('modalAlterarSenha');
-        const card = document.querySelector('.modal-senha-card');
+        const modalSenha = document.getElementById('modalAlterarSenha');
+        const cardSenha = document.querySelector('#modalAlterarSenha .modal-senha-card');
 
-        if (modal && card && modal.classList.contains('ativo')) {
-            const clicouForaDoCard = modal.contains(event.target) && !card.contains(event.target);
+        if (modalSenha && cardSenha && modalSenha.classList.contains('ativo')) {
+            const clicouForaDoCardSenha = modalSenha.contains(event.target) && !cardSenha.contains(event.target);
 
-            if (clicouForaDoCard) {
+            if (clicouForaDoCardSenha) {
                 fecharModalAlterarSenha();
+            }
+        }
+
+        const modalRelatorios = document.getElementById('modalRelatorios');
+        const cardRelatorios = document.querySelector('#modalRelatorios .modal-senha-card');
+
+        if (modalRelatorios && cardRelatorios && modalRelatorios.classList.contains('ativo')) {
+            const clicouForaDoCardRelatorios =
+                modalRelatorios.contains(event.target) && !cardRelatorios.contains(event.target);
+
+            if (clicouForaDoCardRelatorios) {
+                fecharModalRelatorios();
             }
         }
     });

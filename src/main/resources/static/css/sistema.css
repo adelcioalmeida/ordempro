@@ -43,7 +43,7 @@ body {
     min-height: 100vh;
     background: linear-gradient(180deg, #EAF4F8 0%, #DCECF2 55%, #CFE3EC 100%);
     color: #123044;
-    padding: 12px 18px 24px;
+    padding: 8px 18px 24px;
     box-shadow: 4px 0 22px rgba(0, 0, 0, 0.14);
     display: flex;
     flex-direction: column;
@@ -53,9 +53,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 112px;
-    margin-bottom: 10px;
-    padding: 0 0 4px;
+    height: 100px;
+    min-height: 100px;
+    margin-bottom: 22px;
+    padding-top:14px;
+    overflow: visible;
     background: transparent;
     border: none;
     box-shadow: none;
@@ -65,18 +67,21 @@ body {
 .sidebar-logo img,
 .logo-sidebar,
 .sidebar img {
-    max-width: 245px;
-    width: auto;
+    width: 200px;
+    max-width: none;
     height: auto;
     display: block;
     margin: 0 auto;
+    object-fit: contain;
+    transform: scale(1.18);
+    transform-origin: center;
     filter: drop-shadow(0 4px 6px rgba(15, 48, 68, 0.24));
 }
 
 .sidebar-menu {
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 11px;
     width: 100%;
 }
 
@@ -93,7 +98,7 @@ body {
     width: 100%;
     border: none;
     border-radius: 13px;
-    padding: 13px 15px;
+    padding: 12px 15px;
     font-size: 0.95rem;
     text-align: left;
     text-decoration: none;
@@ -115,25 +120,26 @@ body {
 
 .menu-toggle,
 .sidebar-link {
-    background-color: #C8E0EA;
-    color: #123044;
+    background-color: #2F80A0;
+    color: #FFFFFF;
     font-weight: 800;
-    box-shadow: 0 4px 12px rgba(18, 48, 68, 0.08);
+    box-shadow: 0 4px 12px rgba(47, 128, 160, 0.18);
+    transition: all 0.2s ease;
 }
 
 .menu-toggle:hover,
 .sidebar-link:hover {
-    background-color: #A9D0DD;
-    color: #123044;
-    transform: translateX(3px);
-    box-shadow: 0 7px 18px rgba(18, 48, 68, 0.15);
+    background-color: #2F80A0;
+    color: #FFFFFF;
+    filter: brightness(1.08);
+    transform: translateX(2px);
+    box-shadow: 0 6px 16px rgba(47, 128, 160, 0.25);
 }
 
 .menu-toggle.active,
 .sidebar-link.active {
     background-color: #2F80A0;
     color: #FFFFFF;
-    font-weight: 800;
     box-shadow: 0 8px 20px rgba(47, 128, 160, 0.30);
 }
 
@@ -181,8 +187,8 @@ body {
 
 .submenu-link:hover,
 .submenu-link.active {
-    background: #2F80A0;
-    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.85);
+    color: #123044;
     transform: translateX(3px);
 }
 
@@ -937,77 +943,77 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     line-height: 1.5;
 }
 
-/* =========================
-   FORMULÁRIO DE CLIENTE
-========================= */
-
-.cliente-form-grid,
+/* FORMULÁRIO CLIENTE - LAYOUT COMPACTO */
 .cliente-form-grid-ajustado {
     display: grid;
-    grid-template-columns: repeat(15, minmax(0, 1fr));
-    gap: 14px;
-    align-items: end;
-    width: 100%;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 18px 18px;
+    align-items: start;
 }
 
-.cliente-form-grid .campo-nome-ajustado,
-.cliente-form-grid-ajustado .campo-nome-ajustado {
+.campo-nome-ajustado {
+    grid-column: span 8;
+}
+
+.campo-cpf-menor {
+    grid-column: span 3;
+}
+
+.campo-data-nascimento {
+    grid-column: span 3;
+}
+
+.campo-telefone-menor {
+    grid-column: span 3;
+}
+
+.campo-celular-maior {
+    grid-column: span 3;
+}
+
+.campo-email-ajustado {
+    grid-column: span 5;
+}
+
+.campo-cep-menor {
+    grid-column: span 3;
+}
+
+.campo-cidade-maior {
     grid-column: span 4;
 }
 
-.cliente-form-grid .campo-cpf-menor,
-.cliente-form-grid-ajustado .campo-cpf-menor {
-    grid-column: span 2;
-}
-
-.cliente-form-grid .campo-data-nascimento,
-.cliente-form-grid-ajustado .campo-data-nascimento {
-    grid-column: span 2;
-}
-
-.cliente-form-grid .campo-telefone-menor,
-.cliente-form-grid-ajustado .campo-telefone-menor {
-    grid-column: span 2;
-}
-
-.cliente-form-grid .campo-celular-maior,
-.cliente-form-grid-ajustado .campo-celular-maior {
-    grid-column: span 2;
-}
-
-.cliente-form-grid .campo-email-ajustado,
-.cliente-form-grid-ajustado .campo-email-ajustado {
-    grid-column: span 3;
-}
-
-.cliente-form-grid .campo-cep-menor,
-.cliente-form-grid-ajustado .campo-cep-menor {
-    grid-column: span 2;
-}
-
-.cliente-form-grid .campo-cidade-maior,
-.cliente-form-grid-ajustado .campo-cidade-maior {
-    grid-column: span 2;
-}
-
-.cliente-form-grid .campo-uf-menor,
-.cliente-form-grid-ajustado .campo-uf-menor {
+.campo-uf-menor {
     grid-column: span 1;
 }
 
-.cliente-form-grid .campo-endereco-maior,
-.cliente-form-grid-ajustado .campo-endereco-maior {
-    grid-column: span 3;
+.campo-endereco-maior {
+    grid-column: span 6;
 }
 
-.cliente-form-grid .campo-numero-menor,
-.cliente-form-grid-ajustado .campo-numero-menor {
+.campo-numero-menor {
     grid-column: span 1;
 }
 
-.cliente-form-grid .campo-bairro-ajustado,
-.cliente-form-grid-ajustado .campo-bairro-ajustado {
-    grid-column: span 3;
+.campo-bairro-ajustado {
+    grid-column: span 4;
+}
+
+@media (max-width: 900px) {
+    .campo-nome-ajustado,
+    .campo-cpf-menor,
+    .campo-data-nascimento,
+    .campo-telefone-menor,
+    .campo-celular-maior,
+    .campo-email-ajustado,
+    .campo-cep-menor,
+    .campo-cidade-maior,
+    .campo-uf-menor,
+    .campo-endereco-maior,
+    .campo-numero-menor,
+    .campo-bairro-ajustado {
+        grid-column: span 12;
+    }
 }
 
 .cliente-form-grid .form-input,
@@ -1048,16 +1054,17 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     padding: 30px;
     margin-bottom: 0;
 }
-
 .ordem-form-card .ordem-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-areas:
-        "cliente cliente cliente cliente servico servico servico status status status valor valor"
-        "dataAbertura dataAbertura dataAbertura previsao previsao previsao descricao descricao descricao observacao observacao observacao";
-    gap: 34px 24px;
-    align-items: end;
-    margin-bottom: 0;
+        "cliente cliente cliente cliente cliente cliente . . . . . ."
+        "servico servico servico servico servico valor valor . . . . ."
+        "descricao descricao descricao descricao descricao descricao descricao descricao descricao descricao descricao descricao"
+        "observacao observacao observacao observacao observacao observacao observacao observacao observacao observacao observacao observacao"
+        "dataAbertura dataAbertura dataAbertura previsao previsao previsao status status status . . .";
+    gap: 22px 18px;
+    align-items: start;
 }
 
 .ordem-form-card .campo-cliente {
@@ -1111,8 +1118,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 
 .campo-descricao-servico textarea,
 .campo-observacao textarea {
-    height: 46px;
-    min-height: 46px;
+    min-height: 140px;
+    height: 140px;
 }
 
 .campo-texto-modal {
@@ -1356,15 +1363,15 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     }
 
     .sidebar-logo {
-        min-height: 92px;
-        margin-bottom: 12px;
+        min-height: 70px;
+        margin-bottom: 8px;
     }
 
     .logo-imagem,
     .sidebar-logo img,
     .logo-sidebar,
     .sidebar img {
-        max-width: 210px;
+        max-width: 230px;
     }
 
     .main-content {
@@ -1670,5 +1677,320 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 
     .status-badge {
         white-space: nowrap;
+    }
+}
+
+/* =========================================================
+   FILTRO PERSONALIZADO - ORDENS DE SERVIÇO
+========================================================= */
+
+.filtro-box-personalizado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #f4f8fb;
+    border: 1px solid #dbe5ec;
+}
+
+.filtro-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.checkbox-filtro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #123044;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.checkbox-filtro input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #2F80A0;
+}
+
+.filtro-busca-unica {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filtro-busca-unica .form-input {
+    width: 330px;
+    max-width: 100%;
+    height: 42px;
+    padding: 10px 12px;
+}
+
+.filtro-botao-pequeno {
+    width: auto;
+    min-width: 100px;
+    height: 42px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+}
+
+/* Mantém compatibilidade caso alguma tela antiga ainda use estes nomes */
+.filtro-campos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.campo-filtro {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filtro-acoes-personalizado {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   RESPONSIVO FILTRO
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .filtro-box-personalizado {
+        align-items: stretch;
+    }
+
+    .filtro-busca-unica {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtro-busca-unica .form-input,
+    .filtro-busca-unica .primary-button,
+    .filtro-busca-unica .secondary-button,
+    .filtro-botao-pequeno {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   AJUSTE FINAL - NOVA ORDEM DE SERVIÇO
+   Campos menores e organização conforme esboço do professor
+========================================================= */
+
+.ordem-form-card .ordem-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-areas:
+        "cliente cliente cliente cliente cliente cliente . . . . . ."
+        "servico servico servico servico servico valor valor . . . . ."
+        "descricao descricao descricao descricao descricao descricao descricao descricao descricao descricao descricao descricao"
+        "observacao observacao observacao observacao observacao observacao observacao observacao observacao observacao observacao observacao"
+        "dataAbertura dataAbertura dataAbertura previsao previsao previsao status status status . . .";
+    gap: 22px 18px;
+    align-items: start;
+}
+
+.ordem-form-card .campo-cliente {
+    max-width: 620px;
+}
+
+.ordem-form-card .campo-cliente .cliente-busca-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ordem-form-card .campo-cliente .form-input {
+    max-width: 500px;
+}
+
+.ordem-form-card .botao-buscar-cliente {
+    width: auto;
+    min-width: 105px;
+    height: 42px;
+    padding: 8px 12px;
+}
+
+.ordem-form-card .campo-servico {
+    max-width: 460px;
+}
+
+.ordem-form-card .campo-valor {
+    max-width: 200px;
+}
+
+.ordem-form-card .campo-data-abertura {
+    max-width: 240px;
+}
+
+.ordem-form-card .campo-data-previsao {
+    max-width: 240px;
+}
+
+.ordem-form-card .campo-status {
+    max-width: 240px;
+}
+
+.ordem-form-card .campo-descricao-servico,
+.ordem-form-card .campo-observacao {
+    width: 100%;
+    max-width: 100%;
+}
+
+.ordem-form-card .campo-descricao-servico textarea,
+.ordem-form-card .campo-observacao textarea {
+    min-height: 140px;
+    height: 140px;
+    resize: vertical;
+}
+
+/* RESPONSIVIDADE DO FORMULÁRIO DA ORDEM */
+
+@media (max-width: 1200px) {
+    .ordem-form-card .ordem-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+            "cliente cliente"
+            "servico valor"
+            "descricao descricao"
+            "observacao observacao"
+            "dataAbertura previsao"
+            "status status";
+        gap: 18px;
+    }
+
+    .ordem-form-card .campo-cliente,
+    .ordem-form-card .campo-servico,
+    .ordem-form-card .campo-valor,
+    .ordem-form-card .campo-data-abertura,
+    .ordem-form-card .campo-data-previsao,
+    .ordem-form-card .campo-status,
+    .ordem-form-card .campo-cliente .form-input {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .ordem-form-card .ordem-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "cliente"
+            "servico"
+            "valor"
+            "descricao"
+            "observacao"
+            "dataAbertura"
+            "previsao"
+            "status";
+        gap: 16px;
+    }
+
+    .ordem-form-card .campo-cliente .cliente-busca-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ordem-form-card .botao-buscar-cliente {
+        width: 100%;
+    }
+}
+/* =========================================================
+   FORMULÁRIO CLIENTE - LAYOUT FINAL
+========================================================= */
+
+.cliente-form-grid-ajustado {
+    max-width: 1050px;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 18px 18px;
+    align-items: start;
+}
+
+/* 1ª LINHA */
+.campo-nome-ajustado {
+    grid-column: span 12;
+}
+
+/* 2ª LINHA */
+.campo-cpf-menor {
+    grid-column: span 3;
+}
+
+.campo-data-nascimento {
+    grid-column: span 3;
+}
+
+/* 3ª LINHA */
+.campo-telefone-menor {
+    grid-column: 1 / span 3;
+}
+
+.campo-celular-maior {
+    grid-column: span 3;
+}
+
+/* 4ª LINHA */
+.campo-cep-menor {
+    grid-column: 1 / span 3;
+}
+
+.campo-cidade-maior {
+    grid-column: span 3;
+}
+
+.campo-uf-menor {
+    grid-column: span 1;
+}
+
+/* 5ª LINHA */
+.campo-endereco-maior {
+    grid-column: span 6;
+}
+
+.campo-numero-menor {
+    grid-column: span 1;
+}
+
+.campo-bairro-ajustado {
+    grid-column: span 4;
+}
+
+/* 6ª LINHA */
+.campo-email-ajustado {
+    grid-column: span 5;
+}
+
+/* RESPONSIVO */
+@media (max-width: 900px) {
+    .cliente-form-grid-ajustado {
+        max-width: 100%;
+    }
+
+    .campo-nome-ajustado,
+    .campo-cpf-menor,
+    .campo-data-nascimento,
+    .campo-telefone-menor,
+    .campo-celular-maior,
+    .campo-cep-menor,
+    .campo-cidade-maior,
+    .campo-uf-menor,
+    .campo-endereco-maior,
+    .campo-numero-menor,
+    .campo-bairro-ajustado,
+    .campo-email-ajustado {
+        grid-column: span 12;
     }
 }

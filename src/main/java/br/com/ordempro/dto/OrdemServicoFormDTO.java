@@ -2,7 +2,7 @@ package br.com.ordempro.dto;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class OrdemServicoFormDTO {
 
@@ -11,11 +11,11 @@ public class OrdemServicoFormDTO {
     private Long idCliente;
     private Long idServico;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime dataAbertura;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataAbertura;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime dataPrevistaConclusao;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataPrevistaConclusao;
 
     private String status;
     private String observacao;
@@ -54,19 +54,19 @@ public class OrdemServicoFormDTO {
         this.idServico = idServico;
     }
 
-    public LocalDateTime getDataAbertura() {
+    public LocalDate getDataAbertura() {
         return dataAbertura;
     }
 
-    public void setDataAbertura(LocalDateTime dataAbertura) {
+    public void setDataAbertura(LocalDate dataAbertura) {
         this.dataAbertura = dataAbertura;
     }
 
-    public LocalDateTime getDataPrevistaConclusao() {
+    public LocalDate getDataPrevistaConclusao() {
         return dataPrevistaConclusao;
     }
 
-    public void setDataPrevistaConclusao(LocalDateTime dataPrevistaConclusao) {
+    public void setDataPrevistaConclusao(LocalDate dataPrevistaConclusao) {
         this.dataPrevistaConclusao = dataPrevistaConclusao;
     }
 

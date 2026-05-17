@@ -10,13 +10,51 @@ document.addEventListener("DOMContentLoaded", function () {
     configurarBuscaClienteModal();
     preencherClienteSelecionadoNaEdicao();
     configurarMenuMobile();
+    configurarSubmenusPorClique();
 });
 
 function alternarSubmenu(id) {
-    const submenu = document.getElementById(id);
-    if (!submenu) return;
 
-    submenu.classList.toggle("aberto");
+    const submenuAtual = document.getElementById(id);
+
+    if (!submenuAtual) {
+        return;
+    }
+
+    const todosSubmenus = document.querySelectorAll(".submenu");
+
+    todosSubmenus.forEach(function (submenu) {
+        if (submenu.id !== id) {
+            submenu.classList.remove("aberto");
+        }
+    });
+
+    submenuAtual.classList.toggle("aberto");
+}
+
+function configurarSubmenusPorClique() {
+
+    const estiloExistente = document.getElementById("submenu-click-style");
+
+    if (estiloExistente) {
+        return;
+    }
+
+    const estilo = document.createElement("style");
+
+    estilo.id = "submenu-click-style";
+
+    estilo.textContent = `
+        .menu-group:hover .submenu:not(.aberto) {
+            display: none !important;
+        }
+
+        .submenu.aberto {
+            display: flex !important;
+        }
+    `;
+
+    document.head.appendChild(estilo);
 }
 
 function alternarDetalhes(id) {
@@ -620,3 +658,51 @@ function configurarMenuMobile() {
         });
     });
 }
+
+/* =========================================================
+   FILTRO PERSONALIZADO - ORDENS
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+    configurarFiltroPersonalizadoOrdens();
+});
+
+function configurarFiltroPersonalizadoOrdens() {
+
+    const checkStatus = document.getElementById("checkStatus");
+    const checkCliente = document.getElementById("checkCliente");
+    const checkServico = document.getElementById("checkServico");
+
+    const campoStatus = document.getElementById("campoStatus");
+    const campoCliente = document.getElementById("campoCliente");
+    const campoServico = document.getElementById("campoServico");
+
+    if (!checkStatus || !checkCliente || !checkServico) {
+        return;
+    }
+
+    function atualizarCampos() {
+
+        if (campoStatus) {
+            campoStatus.style.display =
+                checkStatus.checked ? "flex" : "none";
+        }
+
+        if (campoCliente) {
+            campoCliente.style.display =
+                checkCliente.checked ? "flex" : "none";
+        }
+
+        if (campoServico) {
+            campoServico.style.display =
+                checkServico.checked ? "flex" : "none";
+        }
+    }
+
+    checkStatus.addEventListener("change", atualizarCampos);
+    checkCliente.addEventListener("change", atualizarCampos);
+    checkServico.addEventListener("change", atualizarCampos);
+
+    atualizarCampos();
+}
+

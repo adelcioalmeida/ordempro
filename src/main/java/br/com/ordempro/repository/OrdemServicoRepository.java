@@ -37,4 +37,6 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     Optional<OrdemServico> findWithClienteByIdOs(Long idOs);
 
     boolean existsByCliente_IdCliente(Long idCliente);
+
+    long countByStatusIgnoreCase(String status);
 }
