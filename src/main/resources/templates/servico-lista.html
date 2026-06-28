@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERVIÇOS</title>
+
+    <link rel="stylesheet" th:href="@{/css/sistema.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <img class="logo-imagem" th:src="@{/img/logo.png}" alt="Logo OrdemPro">
+        </div>
+
+        <nav class="sidebar-menu">
+
+            <a class="sidebar-link home-link" th:href="@{/ordens}">
+                <i class="bi bi-house-door-fill"></i>
+                HOME
+            </a>
+
+            <div class="menu-group" sec:authorize="hasAnyRole('ADMIN', 'GERENTE', 'VENDEDOR')">
+                <button type="button" class="menu-toggle active" onclick="alternarSubmenu('submenu-cadastro')">
+                    <i class="bi bi-person-plus-fill"></i>
+                    CADASTRO
+                </button>
+
+                <div id="submenu-cadastro" class="submenu aberto">
+                    <a class="submenu-link" th:href="@{/clientes}">
+                        <i class="bi bi-person-vcard"></i>
+                        CLIENTE
+                    </a>
+
+                    <a class="submenu-link"
+                       sec:authorize="hasAnyRole('ADMIN', 'GERENTE')"
+                       th:href="@{/cidades}">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        CIDADE
+                    </a>
+
+                    <a class="submenu-link active"
+                       sec:authorize="hasAnyRole('ADMIN', 'GERENTE')"
+                       th:href="@{/servicos}">
+                        <i class="bi bi-tools"></i>
+                        SERVIÇO
+                    </a>
+
+                    <a class="submenu-link"
+                       sec:authorize="hasRole('ADMIN')"
+                       th:href="@{/usuarios}">
+                        <i class="bi bi-person-gear"></i>
+                        USUÁRIO
+                    </a>
+                </div>
+            </div>
+
+            <div class="menu-group">
+                <button type="button" class="menu-toggle" onclick="alternarSubmenu('submenu-ordens')">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    ORDENS DE SERVIÇO
+                </button>
+
+                <div id="submenu-ordens" class="submenu">
+                    <a class="submenu-link" th:href="@{/ordens}">
+                        <i class="bi bi-search"></i>
+                        BUSCA
+                    </a>
+
+                    <a class="submenu-link" th:href="@{/ordens/nova}">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        NOVA
+                    </a>
+                </div>
+            </div>
+
+            <a class="sidebar-link sair-link" th:href="@{/logout}">
+                <i class="bi bi-box-arrow-right"></i>
+                SAIR
+            </a>
+
+        </nav>
+
+        <div class="sidebar-user-card">
+            <button type="button"
+                    class="sidebar-user-button"
+                    onclick="abrirModalAlterarSenha()"
+                    title="Alterar minha senha">
+
+                <div class="sidebar-user-info">
+                    <i class="bi bi-person-circle"></i>
+
+                    <div>
+                        <span class="sidebar-user-name"
+                              th:text="${usuarioLogadoNome + ' • ' + usuarioLogadoPerfil}">
+                            USUÁRIO • PERFIL
+                        </span>
+
+                        <span class="sidebar-user-profile">
+                            Clique para alterar senha
+                        </span>
+                    </div>
+                </div>
+
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+        </div>
+
+    </aside>
+
+    <main class="main-content">
+        <section class="content-card">
+
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">SERVIÇOS</h1>
+                    <p class="page-subtitle">VISUALIZAÇÃO DOS ÚLTIMOS SERVIÇOS OU RESULTADO DA BUSCA</p>
+                </div>
+
+                <a class="primary-button" th:href="@{/servicos/novo}">
+                    <i class="bi bi-plus-circle"></i>
+                    NOVO SERVIÇO
+                </a>
+            </div>
+
+            <div th:if="${sucesso}" class="alerta alerta-sucesso">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${sucesso}">Mensagem de sucesso</span>
+            </div>
+
+            <div th:if="${erro}" class="alerta alerta-erro">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${erro}">Mensagem de erro</span>
+            </div>
+
+            <form method="get" th:action="@{/servicos}" class="filtro-form">
+                <div class="filtro-box-personalizado">
+
+                    <div class="filtro-busca-unica">
+                        <input class="form-input"
+                               type="text"
+                               name="termoBusca"
+                               placeholder="DIGITE O NOME DO SERVIÇO"
+                               th:value="${termoBusca}"
+                               autocomplete="off">
+
+                        <select class="form-select"
+                                name="status"
+                                style="width: 170px; height: 42px;"
+                                th:value="${statusSelecionado}">
+
+                            <option value=""
+                                    th:selected="${statusSelecionado == null or statusSelecionado == ''}">
+                                ATIVOS RECENTES
+                            </option>
+
+                            <option value="ATIVO"
+                                    th:selected="${statusSelecionado == 'ATIVO'}">
+                                ATIVO
+                            </option>
+
+                            <option value="INATIVO"
+                                    th:selected="${statusSelecionado == 'INATIVO'}">
+                                INATIVO
+                            </option>
+
+                            <option value="TODOS"
+                                    th:selected="${statusSelecionado == 'TODOS'}">
+                                TODOS
+                            </option>
+
+                        </select>
+
+                        <button type="submit" class="primary-button filtro-botao-pequeno">
+                            <i class="bi bi-search"></i>
+                            BUSCAR
+                        </button>
+
+                        <a class="secondary-button filtro-botao-pequeno" th:href="@{/servicos}">
+                            <i class="bi bi-eraser"></i>
+                            LIMPAR
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME DO SERVIÇO</th>
+                        <th>STATUS</th>
+                        <th>AÇÕES</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="servico : ${servicos}">
+                        <td data-label="ID" th:text="${servico.idServico}">1</td>
+
+                        <td data-label="NOME DO SERVIÇO" th:text="${servico.nome}">
+                            SERVIÇO
+                        </td>
+
+                        <td data-label="STATUS">
+                            <span class="status-badge"
+                                  th:text="${servico.status}"
+                                  th:classappend="${servico.status == 'ATIVO' ? ' status-finalizada' : ' status-cancelada'}">
+                                ATIVO
+                            </span>
+                        </td>
+
+                        <td data-label="AÇÕES">
+                            <div class="acoes-tabela">
+
+                                <a class="action-icon edit-icon"
+                                   th:href="@{/servicos/editar/{id}(id=${servico.idServico})}"
+                                   title="EDITAR SERVIÇO">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <a th:if="${servico.status == 'ATIVO'}"
+                                   class="action-icon delete-icon"
+                                   th:href="@{/servicos/inativar/{id}(id=${servico.idServico})}"
+                                   onclick="return confirm('Deseja realmente ocultar este serviço? Ele não aparecerá mais nas novas ordens.')"
+                                   title="OCULTAR SERVIÇO">
+                                    <i class="bi bi-eye-slash-fill"></i>
+                                </a>
+
+                                <a th:if="${servico.status == 'INATIVO'}"
+                                   class="action-icon email-icon"
+                                   th:href="@{/servicos/ativar/{id}(id=${servico.idServico})}"
+                                   onclick="return confirm('Deseja ativar novamente este serviço?')"
+                                   title="REATIVAR SERVIÇO">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(servicos)}">
+                        <td colspan="4" class="empty-message">
+                            NENHUM SERVIÇO ENCONTRADO.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<div id="modalAlterarSenha" class="modal-senha-overlay">
+    <div class="modal-senha-card">
+        <div class="modal-senha-header">
+            <h2>ALTERAR SENHA</h2>
+
+            <button type="button"
+                    class="modal-senha-fechar"
+                    onclick="fecharModalAlterarSenha()"
+                    aria-label="Fechar janela de alteração de senha">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <form th:action="@{/usuarios/alterar-senha}" method="post" class="modal-senha-form">
+            <div class="form-group">
+                <label class="form-label" for="senhaAtual">SENHA ATUAL</label>
+                <input class="form-input"
+                       type="password"
+                       id="senhaAtual"
+                       name="senhaAtual"
+                       placeholder="Digite sua senha atual"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="novaSenha">NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="novaSenha"
+                       name="novaSenha"
+                       minlength="6"
+                       placeholder="Digite a nova senha"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmacaoSenha">CONFIRMAR NOVA SENHA</label>
+                <input class="form-input"
+                       type="password"
+                       id="confirmacaoSenha"
+                       name="confirmacaoSenha"
+                       minlength="6"
+                       placeholder="Confirme a nova senha"
+                       required>
+            </div>
+
+            <div class="modal-senha-actions">
+                <button type="submit" class="primary-button">
+                    <i class="bi bi-check-circle"></i>
+                    SALVAR SENHA
+                </button>
+
+                <button type="button"
+                        class="secondary-button"
+                        onclick="fecharModalAlterarSenha()">
+                    <i class="bi bi-x-circle"></i>
+                    CANCELAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.add('ativo');
+        }
+    }
+
+    function fecharModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.remove('ativo');
+        }
+    }
+</script>
+
+<script th:src="@{/js/sistema.js}"></script>
+</body>
+</html>

@@ -21,6 +21,14 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     @EntityGraph(attributePaths = "cidade")
     List<Cliente> findTop5ByAtivoTrueOrderByIdClienteDesc();
 
+    boolean existsByEmailIgnoreCaseAndAtivoTrue(String email);
+
+    boolean existsByEmailIgnoreCaseAndAtivoTrueAndIdClienteNot(String email, Long idCliente);
+
+    boolean existsByCpfAndAtivoTrue(String cpf);
+
+    boolean existsByCpfAndAtivoTrueAndIdClienteNot(String cpf, Long idCliente);
+
     @EntityGraph(attributePaths = "cidade")
     @Query("""
             SELECT c

@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -16,6 +18,7 @@ public class OrdemServicoService {
 
     private static final String STATUS_CANCELADA = "CANCELADA";
     private static final String STATUS_ABERTA = "ABERTA";
+    private static final String STATUS_EM_ANDAMENTO = "EM_ANDAMENTO";
 
     private final OrdemServicoRepository ordemServicoRepository;
     private final ItemOrdemServicoRepository itemRepository;
@@ -35,15 +38,26 @@ public class OrdemServicoService {
 
     @Transactional(readOnly = true)
     public List<OrdemServico> listarUltimas5() {
-        return ordemServicoRepository.findAllByOrderByIdOsDesc(PageRequest.of(0, 5));
+        return ordemServicoRepository.findByStatusInOrderByIdOsDesc(
+                List.of(STATUS_ABERTA, STATUS_EM_ANDAMENTO),
+                PageRequest.of(0, 5)
+        );
     }
 
     @Transactional(readOnly = true)
-    public List<OrdemServico> buscarComFiltros(String status, String cliente, String servico) {
+    public List<OrdemServico> buscarComFiltros(
+            String status,
+            Long idServico,
+            LocalDate dataInicial,
+            LocalDate dataFinal,
+            String cliente
+    ) {
         return ordemServicoRepository.buscarComFiltros(
                 normalizarFiltro(status),
-                normalizarFiltro(cliente),
-                normalizarFiltro(servico)
+                idServico,
+                converterDataInicial(dataInicial),
+                converterDataFinal(dataFinal),
+                normalizarFiltro(cliente)
         );
     }
 
@@ -82,15 +96,11 @@ public class OrdemServicoService {
         ordemServicoRepository.save(ordemServico);
     }
 
-    /**
-     * Método mantido para evitar quebra em outras partes do sistema.
-     * Não realiza exclusão física da ordem de serviço.
-     * A regra do sistema é manter o histórico e apenas cancelar a ordem.
-     */
     public void excluirPorId(Long id) {
         cancelarPorId(id);
     }
 
+    @Transactional(readOnly = true)
     public String buscarDescricaoServico(Long idOs) {
         ItemOrdemServico item = itemRepository
                 .findFirstByOrdemServico_IdOs(idOs)
@@ -100,12 +110,12 @@ public class OrdemServicoService {
             return "NÃO INFORMADO";
         }
 
-        if (item.getDescricao() != null && !item.getDescricao().isBlank()) {
-            return item.getDescricao();
+        if (item.getServico() != null && item.getServico().getNome() != null && !item.getServico().getNome().isBlank()) {
+            return item.getServico().getNome();
         }
 
-        if (item.getServico() != null) {
-            return item.getServico().getNome();
+        if (item.getDescricao() != null && !item.getDescricao().isBlank()) {
+            return item.getDescricao();
         }
 
         return "NÃO INFORMADO";
@@ -117,5 +127,21 @@ public class OrdemServicoService {
         }
 
         return valor.trim();
+    }
+
+    private LocalDateTime converterDataInicial(LocalDate dataInicial) {
+        if (dataInicial == null) {
+            return null;
+        }
+
+        return dataInicial.atStartOfDay();
+    }
+
+    private LocalDateTime converterDataFinal(LocalDate dataFinal) {
+        if (dataFinal == null) {
+            return null;
+        }
+
+        return dataFinal.atTime(23, 59, 59);
     }
 }

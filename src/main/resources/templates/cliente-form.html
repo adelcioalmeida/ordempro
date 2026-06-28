@@ -134,13 +134,11 @@
 
                 <div class="form-grid cliente-form-grid cliente-form-grid-ajustado">
 
-                    <!-- NOME -->
                     <div class="form-group campo-nome-ajustado">
                         <label class="form-label">NOME</label>
                         <input type="text" th:field="*{nome}" class="form-input" required>
                     </div>
 
-                    <!-- CPF + DATA -->
                     <div class="form-group campo-cpf-menor">
                         <label class="form-label">CPF</label>
                         <input type="text"
@@ -148,7 +146,8 @@
                                th:field="*{cpf}"
                                class="form-input"
                                maxlength="14"
-                               placeholder="000.000.000-00">
+                               placeholder="000.000.000-00"
+                               required>
                     </div>
 
                     <div class="form-group campo-data-nascimento">
@@ -156,15 +155,14 @@
                         <input type="date" th:field="*{dataNascimento}" class="form-input">
                     </div>
 
-                    <!-- TELEFONE + CELULAR -->
                     <div class="form-group campo-telefone-menor">
                         <label class="form-label">TELEFONE</label>
                         <input type="text"
                                id="telefone"
                                th:field="*{telefone}"
                                class="form-input"
-                               maxlength="15"
-                               placeholder="(00) 00000-0000">
+                               maxlength="14"
+                               placeholder="(00) 0000-0000">
                     </div>
 
                     <div class="form-group campo-celular-maior">
@@ -177,7 +175,6 @@
                                placeholder="(00) 00000-0000">
                     </div>
 
-                    <!-- CEP + CIDADE + UF -->
                     <div class="form-group campo-cep-menor">
                         <label class="form-label">CEP</label>
                         <input type="text"
@@ -207,7 +204,7 @@
 
                         <input type="hidden"
                                id="cidade"
-                               name="cidade"
+                               name="cidade.idCidade"
                                th:value="${cliente.cidade != null ? cliente.cidade.idCidade : ''}">
                     </div>
 
@@ -216,7 +213,6 @@
                         <input type="text" id="ufCliente" class="form-input" readonly placeholder="UF">
                     </div>
 
-                    <!-- ENDEREÇO + NÚMERO + BAIRRO -->
                     <div class="form-group campo-endereco-maior">
                         <label class="form-label">ENDEREÇO</label>
                         <input type="text" th:field="*{endereco}" class="form-input">
@@ -232,13 +228,13 @@
                         <input type="text" th:field="*{bairro}" class="form-input">
                     </div>
 
-                    <!-- EMAIL -->
                     <div class="form-group campo-email-ajustado">
                         <label class="form-label">E-MAIL</label>
                         <input type="email"
                                th:field="*{email}"
                                class="form-input"
-                               placeholder="cliente@email.com">
+                               placeholder="cliente@email.com"
+                               required>
                     </div>
 
                 </div>
@@ -260,6 +256,123 @@
         </div>
     </main>
 </div>
+
+<script>
+    function somenteNumeros(valor) {
+        return (valor || '').replace(/\D/g, '');
+    }
+
+    function aplicarMascaraCpf(valor) {
+        const numeros = somenteNumeros(valor).slice(0, 11);
+
+        return numeros
+            .replace(/^(\d{3})(\d)/, '$1.$2')
+            .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+    }
+
+    function aplicarMascaraTelefone(valor) {
+        const numeros = somenteNumeros(valor).slice(0, 10);
+
+        return numeros
+            .replace(/^(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{4})(\d)/, '$1-$2');
+    }
+
+    function aplicarMascaraCelular(valor) {
+        const numeros = somenteNumeros(valor).slice(0, 11);
+
+        return numeros
+            .replace(/^(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{5})(\d)/, '$1-$2');
+    }
+
+    function aplicarMascaraCep(valor) {
+        const numeros = somenteNumeros(valor).slice(0, 8);
+
+        return numeros.replace(/^(\d{5})(\d)/, '$1-$2');
+    }
+
+    function configurarMascaras() {
+        const cpf = document.getElementById('cpf');
+        const telefone = document.getElementById('telefone');
+        const celular = document.getElementById('celular');
+        const cep = document.getElementById('cep');
+
+        if (cpf) {
+            cpf.value = aplicarMascaraCpf(cpf.value);
+            cpf.addEventListener('input', function () {
+                cpf.value = aplicarMascaraCpf(cpf.value);
+            });
+        }
+
+        if (telefone) {
+            telefone.value = aplicarMascaraTelefone(telefone.value);
+            telefone.addEventListener('input', function () {
+                telefone.value = aplicarMascaraTelefone(telefone.value);
+            });
+        }
+
+        if (celular) {
+            celular.value = aplicarMascaraCelular(celular.value);
+            celular.addEventListener('input', function () {
+                celular.value = aplicarMascaraCelular(celular.value);
+            });
+        }
+
+        if (cep) {
+            cep.value = aplicarMascaraCep(cep.value);
+            cep.addEventListener('input', function () {
+                cep.value = aplicarMascaraCep(cep.value);
+            });
+        }
+    }
+
+    function configurarCidade() {
+        const cidadeBusca = document.getElementById('cidadeBusca');
+        const cidadeHidden = document.getElementById('cidade');
+        const ufCliente = document.getElementById('ufCliente');
+        const listaCidades = document.getElementById('listaCidades');
+
+        if (!cidadeBusca || !cidadeHidden || !ufCliente || !listaCidades) {
+            return;
+        }
+
+        const options = Array.from(listaCidades.options);
+
+        const cidadeAtual = cidadeHidden.value;
+
+        if (cidadeAtual) {
+            const optionAtual = options.find(option => option.dataset.id === cidadeAtual);
+
+            if (optionAtual) {
+                cidadeBusca.value = optionAtual.value;
+                ufCliente.value = optionAtual.dataset.uf || '';
+            }
+        }
+
+        cidadeBusca.addEventListener('input', function () {
+            const valorDigitado = cidadeBusca.value.trim().toLowerCase();
+
+            const optionSelecionada = options.find(option =>
+                option.value.trim().toLowerCase() === valorDigitado
+            );
+
+            if (optionSelecionada) {
+                cidadeHidden.value = optionSelecionada.dataset.id;
+                ufCliente.value = optionSelecionada.dataset.uf || '';
+            } else {
+                cidadeHidden.value = '';
+                ufCliente.value = '';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        configurarMascaras();
+        configurarCidade();
+    });
+</script>
 
 </body>
 </html>

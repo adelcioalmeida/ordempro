@@ -1994,3 +1994,229 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
         grid-column: span 12;
     }
 }
+/* =========================================================
+   AJUSTES FINAIS - FILTROS DA TELA DE ORDENS
+   Alteração segura: apenas sobrescreve visualmente o filtro novo
+========================================================= */
+
+.filtro-grid-novo {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+
+.campo-cliente-filtro {
+    grid-column: span 2;
+}
+
+.filtro-acoes-novo {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.filtro-acoes-novo .primary-button,
+.filtro-acoes-novo .secondary-button {
+    min-width: 115px;
+    height: 42px;
+}
+
+.filtro-grid-novo .form-group {
+    margin-bottom: 0;
+}
+
+/* Remove o vermelho forte do botão SAIR */
+.sair-link {
+    background-color: #2F80A0 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(47, 128, 160, 0.18) !important;
+}
+
+.sair-link:hover {
+    background-color: #2F80A0 !important;
+    color: #FFFFFF !important;
+    filter: brightness(1.08);
+}
+
+/* Responsividade dos novos filtros */
+@media (max-width: 1100px) {
+    .filtro-grid-novo {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .campo-cliente-filtro {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 700px) {
+    .filtro-grid-novo {
+        grid-template-columns: 1fr;
+    }
+
+    .campo-cliente-filtro {
+        grid-column: span 1;
+    }
+
+    .filtro-acoes-novo {
+        flex-direction: column;
+    }
+
+    .filtro-acoes-novo .primary-button,
+    .filtro-acoes-novo .secondary-button {
+        width: 100%;
+    }
+}
+/* =========================================================
+   FILTRO GUIADO - MODELO PROFESSOR
+========================================================= */
+
+.filtro-box-personalizado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #f4f8fb;
+    border: 1px solid #dbe5ec;
+}
+
+.filtro-grid-checkbox {
+    width: 430px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-linha {
+    display: grid;
+    grid-template-columns: 95px 1fr;
+    align-items: center;
+    gap: 8px;
+}
+
+.filtro-linha .checkbox-filtro {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.filtro-linha .checkbox-filtro input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.filtro-campo,
+.filtro-data {
+    height: 34px !important;
+    min-height: 34px;
+    padding: 6px 10px !important;
+    font-size: 0.82rem !important;
+    border-radius: 5px;
+}
+
+.filtro-periodo-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.filtro-campo:disabled,
+.filtro-data:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.filtro-acoes-novo {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.filtro-acoes-novo .primary-button,
+.filtro-acoes-novo .secondary-button {
+    height: 36px;
+    min-width: 105px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 700px) {
+
+    .filtro-grid-checkbox {
+        width: 100%;
+    }
+
+    .filtro-linha {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+
+    .filtro-periodo-campos {
+        grid-template-columns: 1fr;
+    }
+
+    .filtro-acoes-novo {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .filtro-acoes-novo .primary-button,
+    .filtro-acoes-novo .secondary-button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   AJUSTE - CAMPO CLIENTE MAIOR NO FILTRO DE ORDENS
+========================================================= */
+
+.filtro-grid-checkbox .filtro-linha:nth-child(4) {
+    width: 650px;
+    max-width: 100%;
+    grid-template-columns: 95px 1fr;
+}
+
+.filtro-grid-checkbox .filtro-linha:nth-child(4) > div {
+    width: 100%;
+}
+
+.filtro-grid-checkbox .filtro-linha:nth-child(4) #cliente {
+    width: 100%;
+    min-width: 360px;
+}
+
+.filtro-grid-checkbox .filtro-linha:nth-child(4) #botaoBuscarCliente {
+    min-width: 95px;
+}
+
+@media (max-width: 700px) {
+    .filtro-grid-checkbox .filtro-linha:nth-child(4) {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .filtro-grid-checkbox .filtro-linha:nth-child(4) > div {
+        flex-direction: column;
+    }
+
+    .filtro-grid-checkbox .filtro-linha:nth-child(4) #cliente,
+    .filtro-grid-checkbox .filtro-linha:nth-child(4) #botaoBuscarCliente {
+        width: 100%;
+        min-width: 0;
+    }
+}

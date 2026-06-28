@@ -26,6 +26,7 @@ public class ClienteService {
     }
 
     public Cliente salvar(Cliente cliente) {
+
         validarCliente(cliente);
 
         if (cliente.getAtivo() == null) {
@@ -56,6 +57,7 @@ public class ClienteService {
     }
 
     public List<Cliente> buscarComFiltro(String filtro) {
+
         if (filtro == null || filtro.trim().isEmpty()) {
             return clienteRepository.findTop5ByAtivoTrueOrderByIdClienteDesc();
         }
@@ -63,10 +65,14 @@ public class ClienteService {
         String filtroTexto = filtro.trim();
         String filtroNumerico = filtroTexto.replaceAll("\\D", "");
 
-        return clienteRepository.buscarComFiltroAtivos(filtroTexto, filtroNumerico);
+        return clienteRepository.buscarComFiltroAtivos(
+                filtroTexto,
+                filtroNumerico
+        );
     }
 
     public void excluirPorId(Long id) {
+
         Cliente cliente = buscarPorId(id);
 
         if (cliente == null) {
@@ -74,6 +80,7 @@ public class ClienteService {
         }
 
         cliente.setAtivo(false);
+
         clienteRepository.save(cliente);
     }
 
@@ -82,6 +89,7 @@ public class ClienteService {
     }
 
     private void validarCliente(Cliente cliente) {
+
         if (cliente == null) {
             throw new IllegalStateException("Dados do cliente não informados.");
         }
@@ -91,7 +99,99 @@ public class ClienteService {
         }
 
         if (cliente.getCidade() == null || cliente.getCidade().getIdCidade() == null) {
-            throw new IllegalStateException("Selecione uma cidade para o cliente.");
+            throw new IllegalStateException("Selecione uma cidade válida.");
         }
+
+        String cpf = limpar(cliente.getCpf());
+
+        if (cpf.isBlank()) {
+            throw new IllegalStateException("Informe o CPF.");
+        }
+
+        if (cpf.length() != 11) {
+            throw new IllegalStateException("CPF inválido. Informe os 11 dígitos.");
+        }
+
+        if (cliente.getIdCliente() == null) {
+
+            if (clienteRepository.existsByCpfAndAtivoTrue(cpf)) {
+                throw new IllegalStateException("Já existe um cliente cadastrado com este CPF.");
+            }
+
+        } else {
+
+            if (clienteRepository.existsByCpfAndAtivoTrueAndIdClienteNot(
+                    cpf,
+                    cliente.getIdCliente()
+            )) {
+                throw new IllegalStateException("Já existe um cliente cadastrado com este CPF.");
+            }
+        }
+
+        String email = cliente.getEmail() == null
+                ? ""
+                : cliente.getEmail().trim();
+
+        if (email.isBlank()) {
+            throw new IllegalStateException("Informe o e-mail.");
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            throw new IllegalStateException("E-mail inválido.");
+        }
+
+        if (cliente.getIdCliente() == null) {
+
+            if (clienteRepository.existsByEmailIgnoreCaseAndAtivoTrue(email)) {
+                throw new IllegalStateException("Já existe um cliente cadastrado com este e-mail.");
+            }
+
+        } else {
+
+            if (clienteRepository.existsByEmailIgnoreCaseAndAtivoTrueAndIdClienteNot(
+                    email,
+                    cliente.getIdCliente()
+            )) {
+                throw new IllegalStateException("Já existe um cliente cadastrado com este e-mail.");
+            }
+        }
+
+        String telefone = limpar(cliente.getTelefone());
+        String celular = limpar(cliente.getCelular());
+
+        if (telefone.isBlank() && celular.isBlank()) {
+            throw new IllegalStateException(
+                    "Informe pelo menos um telefone ou celular para contato."
+            );
+        }
+
+        if (!telefone.isBlank() && telefone.length() != 10) {
+            throw new IllegalStateException(
+                    "Telefone inválido. Informe DDD + número completo."
+            );
+        }
+
+        if (!celular.isBlank() && celular.length() != 11) {
+            throw new IllegalStateException(
+                    "Celular inválido. Informe DDD + número completo."
+            );
+        }
+
+        String cep = limpar(cliente.getCep());
+
+        if (!cep.isBlank() && cep.length() != 8) {
+            throw new IllegalStateException(
+                    "CEP inválido."
+            );
+        }
+    }
+
+    private String limpar(String valor) {
+
+        if (valor == null) {
+            return "";
+        }
+
+        return valor.replaceAll("\\D", "");
     }
 }

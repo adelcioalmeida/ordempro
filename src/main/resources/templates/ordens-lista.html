@@ -24,7 +24,9 @@
 
         <nav class="sidebar-menu">
 
-            <a class="sidebar-link home-link active" th:href="@{/ordens}">
+            <a id="linkHomeOrdens"
+               class="sidebar-link home-link active"
+               th:href="@{/ordens}">
                 <i class="bi bi-house-door-fill"></i>
                 HOME
             </a>
@@ -49,6 +51,13 @@
                     </a>
 
                     <a class="submenu-link"
+                       sec:authorize="hasAnyRole('ADMIN', 'GERENTE')"
+                       th:href="@{/servicos}">
+                        <i class="bi bi-tools"></i>
+                        SERVIÇO
+                    </a>
+
+                    <a class="submenu-link"
                        sec:authorize="hasRole('ADMIN')"
                        th:href="@{/usuarios}">
                         <i class="bi bi-person-gear"></i>
@@ -64,7 +73,9 @@
                 </button>
 
                 <div id="submenu-ordens" class="submenu">
-                    <a class="submenu-link active" th:href="@{/ordens}">
+                    <a id="linkBuscaOrdens"
+                       class="submenu-link"
+                       th:href="@{/ordens(modo='busca')}">
                         <i class="bi bi-search"></i>
                         BUSCA
                     </a>
@@ -74,13 +85,13 @@
                         NOVA
                     </a>
                 </div>
-            </div>
 
-            <div class="menu-group">
-                <button type="button" class="menu-toggle" onclick="abrirModalRelatorios()">
-                    <i class="bi bi-bar-chart-fill"></i>
-                    RELATÓRIOS
-                </button>
+                <div class="menu-group">
+                    <button type="button" class="menu-toggle" onclick="abrirModalRelatorios()">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        RELATÓRIOS
+                    </button>
+                </div>
             </div>
 
             <a class="sidebar-link sair-link" th:href="@{/logout}">
@@ -122,8 +133,8 @@
             <div class="page-header">
 
                 <div>
-                    <h1 class="page-title">ORDENS DE SERVIÇO</h1>
-                    <p class="page-subtitle">VISUALIZAÇÃO DAS ÚLTIMAS 5 ORDENS CADASTRADAS OU RESULTADO DOS FILTROS</p>
+                    <h1 id="tituloPaginaOrdens" class="page-title">ORDENS DE SERVIÇO</h1>
+                    <p id="subtituloPaginaOrdens" class="page-subtitle">VISUALIZAÇÃO DAS ÚLTIMAS 5 ORDENS CADASTRADAS OU RESULTADO DOS FILTROS</p>
                 </div>
 
                 <a class="primary-button" th:href="@{/ordens/nova}">
@@ -137,12 +148,16 @@
                 <span th:text="${sucesso}">Mensagem de sucesso</span>
             </div>
 
-            <div th:if="${erro}" class="alerta alerta-erro">
+            <div th:if="${erro}"
+                 class="alerta-erro"
+                 id="mensagemErro">
+
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                <span th:text="${erro}">Mensagem de erro</span>
+                <span th:text="${erro}"></span>
+
             </div>
 
-            <div class="resumo-cards">
+            <div id="painelHomeCards" class="resumo-cards">
 
                 <div class="resumo-card">
                     <span class="resumo-label">TOTAL DE ORDENS</span>
@@ -153,8 +168,8 @@
                     </strong>
 
                     <span class="resumo-texto">
-            ORDENS CADASTRADAS
-        </span>
+                        ORDENS CADASTRADAS
+                    </span>
                 </div>
 
                 <div class="resumo-card">
@@ -166,8 +181,8 @@
                     </strong>
 
                     <span class="resumo-texto">
-            CLIENTES CADASTRADOS
-        </span>
+                        CLIENTES CADASTRADOS
+                    </span>
                 </div>
 
                 <div class="resumo-card">
@@ -179,55 +194,192 @@
                     </strong>
 
                     <span class="resumo-texto">
-            AGUARDANDO FINALIZAÇÃO
-        </span>
+                        AGUARDANDO FINALIZAÇÃO
+                    </span>
                 </div>
 
             </div>
 
-            <form method="get" th:action="@{/ordens}" class="filtro-form">
+            <form id="painelBusca"
+                  method="get"
+                  th:action="@{/ordens}"
+                  class="filtro-form"
+                  style="display: none;">
+
+                <input type="hidden" name="modo" value="busca">
+
                 <div class="filtro-box-personalizado">
 
-                    <div class="filtro-checkbox-group">
-                        <label class="checkbox-filtro">
-                            <input type="checkbox" id="filtroStatus" name="filtros" value="status">
-                            STATUS
-                        </label>
+                    <div class="filtro-grid-checkbox">
 
-                        <label class="checkbox-filtro">
-                            <input type="checkbox" id="filtroCliente" name="filtros" value="cliente">
-                            CLIENTE
-                        </label>
+                        <div class="filtro-linha">
+                            <label class="checkbox-filtro">
+                                <input type="checkbox"
+                                       id="usarStatus"
+                                       name="usarStatus"
+                                       th:checked="${usarStatus}"
+                                       onchange="toggleFiltro('status')">
+                                STATUS
+                            </label>
 
-                        <label class="checkbox-filtro">
-                            <input type="checkbox" id="filtroServico" name="filtros" value="servico">
-                            SERVIÇO
-                        </label>
+                            <select class="form-select filtro-campo"
+                                    id="status"
+                                    name="status"
+                                    th:disabled="${!usarStatus}">
+
+                                <option value="">TODOS</option>
+
+                                <option value="ABERTA"
+                                        th:selected="${statusSelecionado == 'ABERTA'}">
+                                    ABERTA
+                                </option>
+
+                                <option value="EM_ANDAMENTO"
+                                        th:selected="${statusSelecionado == 'EM_ANDAMENTO'}">
+                                    EM ANDAMENTO
+                                </option>
+
+                                <option value="FINALIZADA"
+                                        th:selected="${statusSelecionado == 'FINALIZADA'}">
+                                    FINALIZADA
+                                </option>
+
+                                <option value="CANCELADA"
+                                        th:selected="${statusSelecionado == 'CANCELADA'}">
+                                    CANCELADA
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="filtro-linha">
+
+                            <label class="checkbox-filtro">
+                                <input type="checkbox"
+                                       id="usarServico"
+                                       name="usarServico"
+                                       th:checked="${usarServico}"
+                                       onchange="toggleFiltro('idServico')">
+                                SERVIÇO
+                            </label>
+
+                            <select class="form-select filtro-campo"
+                                    id="idServico"
+                                    name="idServico"
+                                    th:disabled="${!usarServico}">
+
+                                <option value="">TODOS</option>
+
+                                <option th:each="servico : ${servicos}"
+                                        th:value="${servico.idServico}"
+                                        th:text="${servico.nome}"
+                                        th:selected="${servicoSelecionado == servico.idServico}">
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="filtro-linha">
+
+                            <label class="checkbox-filtro">
+                                <input type="checkbox"
+                                       id="usarPeriodo"
+                                       name="usarPeriodo"
+                                       th:checked="${usarPeriodo}"
+                                       onchange="togglePeriodo()">
+                                PERÍODO
+                            </label>
+
+                            <div class="filtro-periodo-campos">
+
+                                <input class="form-input filtro-data"
+                                       type="date"
+                                       id="dataInicial"
+                                       name="dataInicial"
+                                       th:value="${dataInicial}"
+                                       th:disabled="${!usarPeriodo}">
+
+                                <input class="form-input filtro-data"
+                                       type="date"
+                                       id="dataFinal"
+                                       name="dataFinal"
+                                       th:value="${dataFinal}"
+                                       th:disabled="${!usarPeriodo}">
+
+                            </div>
+
+                        </div>
+
+                        <div class="filtro-linha">
+
+                            <label class="checkbox-filtro">
+                                <input type="checkbox"
+                                       id="usarCliente"
+                                       name="usarCliente"
+                                       th:checked="${usarCliente}"
+                                       onchange="toggleFiltroCliente()">
+                                CLIENTE
+                            </label>
+
+                            <div style="display: flex; gap: 8px; width: 100%;">
+
+                                <input class="form-input filtro-campo"
+                                       type="text"
+                                       id="cliente"
+                                       name="cliente"
+                                       placeholder="SELECIONE UM CLIENTE"
+                                       th:value="${cliente}"
+                                       autocomplete="off"
+                                       readonly
+                                       th:disabled="${!usarCliente}">
+
+                                <button type="button"
+                                        class="secondary-button filtro-botao-pequeno"
+                                        id="botaoBuscarCliente"
+                                        onclick="abrirModalBuscaCliente()"
+                                        th:disabled="${!usarCliente}">
+
+                                    <i class="bi bi-search"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="filtro-busca-unica">
-                        <input class="form-input"
-                               type="text"
-                               id="termoBusca"
-                               name="termoBusca"
-                               placeholder="DIGITE O TERMO DA BUSCA"
-                               autocomplete="off">
+                    <div class="filtro-acoes-novo">
 
                         <button type="submit" class="primary-button filtro-botao-pequeno">
                             <i class="bi bi-search"></i>
                             BUSCAR
                         </button>
 
-                        <a class="secondary-button filtro-botao-pequeno" th:href="@{/ordens}">
+                        <button type="submit"
+                                class="secondary-button filtro-botao-pequeno"
+                                formaction="/ordens/relatorio"
+                                formmethod="get">
+
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                            GERAR RELATÓRIO
+                        </button>
+
+                        <a class="secondary-button filtro-botao-pequeno"
+                           th:href="@{/ordens(modo='busca')}">
+
                             <i class="bi bi-eraser"></i>
                             LIMPAR
                         </a>
+
                     </div>
 
                 </div>
+
             </form>
 
-            <div class="table-container ordens-table-container">
+            <div id="painelHomeTabela" class="table-container ordens-table-container">
                 <table class="data-table ordens-table">
                     <thead>
                     <tr>
@@ -354,6 +506,7 @@
                                    th:title="${usuarioLogadoPerfil == 'VENDEDOR' ? 'EDITAR ORDEM ABERTA' : 'EDITAR'}">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
+
                                 <a class="action-icon pdf-icon"
                                    th:href="@{/ordens/pdf/{id}(id=${ordem.idOs})}"
                                    title="BAIXAR PDF">
@@ -390,6 +543,64 @@
 
         </section>
     </main>
+</div>
+
+<div id="modalBuscaCliente" class="modal-senha-overlay">
+
+    <div class="modal-senha-card"
+         style="max-width: 900px; width: 95%;">
+
+        <div class="modal-senha-header">
+
+            <h2>BUSCAR CLIENTE</h2>
+
+            <button type="button"
+                    class="modal-senha-fechar"
+                    onclick="fecharModalBuscaCliente()">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+        <div style="margin-top: 15px;">
+
+            <input class="form-input"
+                   type="text"
+                   id="campoBuscaCliente"
+                   placeholder="DIGITE NOME, CPF, TELEFONE OU CIDADE">
+
+        </div>
+
+        <div class="table-container"
+             style="margin-top: 18px; max-height: 400px; overflow-y: auto;">
+
+            <table class="data-table">
+
+                <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>NOME</th>
+                    <th>CPF</th>
+                    <th>TELEFONE</th>
+                    <th>CIDADE</th>
+                    <th>AÇÃO</th>
+                </tr>
+
+                </thead>
+
+                <tbody id="resultadoBuscaCliente">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
 </div>
 
 <div id="modalAlterarSenha" class="modal-senha-overlay">
@@ -456,20 +667,25 @@
 </div>
 
 <div id="modalRelatorios" class="modal-senha-overlay">
+
     <div class="modal-senha-card">
 
         <div class="modal-senha-header">
+
             <h2>RELATÓRIOS</h2>
 
             <button type="button"
                     class="modal-senha-fechar"
-                    onclick="fecharModalRelatorios()"
-                    aria-label="Fechar janela de relatórios">
+                    onclick="fecharModalRelatorios()">
+
                 <i class="bi bi-x-lg"></i>
+
             </button>
+
         </div>
 
-        <div class="modal-relatorios-opcoes" style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
+        <div class="modal-relatorios-opcoes"
+             style="display: flex; flex-direction: column; gap: 12px; margin-top: 18px;">
 
             <a class="submenu-link" th:href="@{/ordens}">
                 <i class="bi bi-list-check"></i>
@@ -494,24 +710,187 @@
         </div>
 
     </div>
+
 </div>
 
 <script>
-    function abrirModalAlterarSenha() {
-        const modal = document.getElementById('modalAlterarSenha');
+    function toggleFiltro(idCampo) {
+        const campo = document.getElementById(idCampo);
+
+        if (!campo) {
+            return;
+        }
+
+        campo.disabled = !campo.disabled;
+
+        if (campo.disabled) {
+            campo.value = '';
+        }
+    }
+
+    function toggleFiltroCliente() {
+        const campoCliente = document.getElementById('cliente');
+        const botaoCliente = document.getElementById('botaoBuscarCliente');
+
+        if (!campoCliente || !botaoCliente) {
+            return;
+        }
+
+        campoCliente.disabled = !campoCliente.disabled;
+        botaoCliente.disabled = !botaoCliente.disabled;
+
+        if (campoCliente.disabled) {
+            campoCliente.value = '';
+        }
+    }
+
+    function togglePeriodo() {
+        const dataInicial = document.getElementById('dataInicial');
+        const dataFinal = document.getElementById('dataFinal');
+
+        dataInicial.disabled = !dataInicial.disabled;
+        dataFinal.disabled = !dataFinal.disabled;
+
+        if (dataInicial.disabled) {
+            dataInicial.value = '';
+        }
+
+        if (dataFinal.disabled) {
+            dataFinal.value = '';
+        }
+    }
+
+    function abrirModalBuscaCliente() {
+        const modal = document.getElementById('modalBuscaCliente');
+        const campoBusca = document.getElementById('campoBuscaCliente');
+
+        if (campoBusca) {
+            campoBusca.value = '';
+        }
 
         if (modal) {
             modal.classList.add('ativo');
         }
+
+        carregarClientes('');
     }
 
-    function fecharModalAlterarSenha() {
-        const modal = document.getElementById('modalAlterarSenha');
+    function fecharModalBuscaCliente() {
+        const modal = document.getElementById('modalBuscaCliente');
 
         if (modal) {
             modal.classList.remove('ativo');
         }
     }
+
+    async function carregarClientes(filtro) {
+
+    const tbody = document.getElementById('resultadoBuscaCliente');
+
+    if (!tbody) {
+        return;
+    }
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="6">CARREGANDO...</td>
+        </tr>
+    `;
+
+    const response = await fetch(`/ordens/clientes/buscar?filtro=${encodeURIComponent(filtro)}`);
+    const clientes = await response.json();
+
+    if (clientes.length === 0) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6">NENHUM CLIENTE ENCONTRADO.</td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    clientes.forEach(cliente => {
+
+        const linha = document.createElement('tr');
+
+        linha.innerHTML = `
+            <td>${cliente.idCliente}</td>
+            <td>${cliente.nome}</td>
+            <td>${cliente.cpf}</td>
+            <td>${cliente.telefone}</td>
+            <td>${cliente.cidade} - ${cliente.uf}</td>
+            <td>
+                <button type="button"
+                        class="primary-button filtro-botao-pequeno selecionar-cliente-btn">
+                    SELECIONAR
+                </button>
+            </td>
+        `;
+
+        const botaoSelecionar = linha.querySelector('.selecionar-cliente-btn');
+
+        botaoSelecionar.addEventListener('click', () => {
+
+            const campoCliente = document.getElementById('cliente');
+            const checkboxCliente = document.getElementById('usarCliente');
+            const botaoCliente = document.getElementById('botaoBuscarCliente');
+            const formulario = document.getElementById('formFiltrosOrdens');
+
+            if (checkboxCliente) {
+                checkboxCliente.checked = true;
+            }
+
+            if (campoCliente) {
+                campoCliente.disabled = false;
+                campoCliente.removeAttribute('disabled');
+                campoCliente.value = cliente.nome;
+            }
+
+            if (botaoCliente) {
+                botaoCliente.disabled = false;
+            }
+
+            fecharModalBuscaCliente();
+
+            setTimeout(() => {
+                formulario.submit();
+            }, 300);
+        });
+
+        tbody.appendChild(linha);
+    });
+}
+
+    function selecionarCliente(nomeCliente) {
+
+    const campoCliente = document.getElementById('cliente');
+    const checkboxCliente = document.getElementById('usarCliente');
+    const botaoCliente = document.getElementById('botaoBuscarCliente');
+
+    if (checkboxCliente) {
+        checkboxCliente.checked = true;
+    }
+
+    if (campoCliente) {
+        campoCliente.disabled = false;
+        campoCliente.removeAttribute('disabled');
+        campoCliente.value = nomeCliente;
+    }
+
+    if (botaoCliente) {
+        botaoCliente.disabled = false;
+    }
+
+    fecharModalBuscaCliente();
+
+    setTimeout(() => {
+        document.getElementById('formFiltrosOrdens').submit();
+    }, 200);
+}
 
     function abrirModalRelatorios() {
         const modal = document.getElementById('modalRelatorios');
@@ -529,10 +908,147 @@
         }
     }
 
+    function abrirModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.add('ativo');
+        }
+    }
+
+    function fecharModalAlterarSenha() {
+        const modal = document.getElementById('modalAlterarSenha');
+
+        if (modal) {
+            modal.classList.remove('ativo');
+        }
+    }
+
+
+    function existeParametroBusca() {
+        const parametros = new URLSearchParams(window.location.search);
+
+        return parametros.has('status')
+                || parametros.has('idServico')
+                || parametros.has('dataInicial')
+                || parametros.has('dataFinal')
+                || parametros.has('cliente')
+                || parametros.has('usarStatus')
+                || parametros.has('usarServico')
+                || parametros.has('usarPeriodo')
+                || parametros.has('usarCliente');
+    }
+
+    function modoBuscaAtivo() {
+        const parametros = new URLSearchParams(window.location.search);
+
+        return parametros.get('modo') === 'busca' || existeParametroBusca();
+    }
+
+    function mostrarHomeOrdens() {
+        const painelBusca = document.getElementById('painelBusca');
+        const painelHomeCards = document.getElementById('painelHomeCards');
+        const painelHomeTabela = document.getElementById('painelHomeTabela');
+        const linkHome = document.getElementById('linkHomeOrdens');
+        const linkBusca = document.getElementById('linkBuscaOrdens');
+        const titulo = document.getElementById('tituloPaginaOrdens');
+        const subtitulo = document.getElementById('subtituloPaginaOrdens');
+
+        if (painelBusca) {
+            painelBusca.style.display = 'none';
+        }
+
+        if (painelHomeCards) {
+            painelHomeCards.style.display = 'flex';
+        }
+
+        if (painelHomeTabela) {
+            painelHomeTabela.style.display = 'block';
+        }
+
+        if (linkHome) {
+            linkHome.classList.add('active');
+        }
+
+        if (linkBusca) {
+            linkBusca.classList.remove('active');
+        }
+
+        if (titulo) {
+            titulo.textContent = 'ORDENS DE SERVIÇO';
+        }
+
+        if (subtitulo) {
+            subtitulo.textContent = 'VISUALIZAÇÃO DAS ÚLTIMAS 5 ORDENS CADASTRADAS';
+        }
+    }
+
+    function mostrarBuscaOrdens() {
+        const painelBusca = document.getElementById('painelBusca');
+        const painelHomeCards = document.getElementById('painelHomeCards');
+        const painelHomeTabela = document.getElementById('painelHomeTabela');
+        const linkHome = document.getElementById('linkHomeOrdens');
+        const linkBusca = document.getElementById('linkBuscaOrdens');
+        const titulo = document.getElementById('tituloPaginaOrdens');
+        const subtitulo = document.getElementById('subtituloPaginaOrdens');
+
+        if (painelHomeCards) {
+            painelHomeCards.style.display = 'none';
+        }
+
+        if (painelBusca) {
+            painelBusca.style.display = 'block';
+        }
+
+        if (painelHomeTabela) {
+            painelHomeTabela.style.display = existeParametroBusca() ? 'block' : 'none';
+        }
+
+        if (linkHome) {
+            linkHome.classList.remove('active');
+        }
+
+        if (linkBusca) {
+            linkBusca.classList.add('active');
+        }
+
+        if (titulo) {
+            titulo.textContent = 'BUSCA DE ORDENS DE SERVIÇO';
+        }
+
+        if (subtitulo) {
+            subtitulo.textContent = existeParametroBusca()
+                    ? 'RESULTADO DOS FILTROS APLICADOS'
+                    : 'SELECIONE OS FILTROS PARA LOCALIZAR AS ORDENS';
+        }
+    }
+
+    function aplicarModoDaTela() {
+        if (modoBuscaAtivo()) {
+            mostrarBuscaOrdens();
+            return;
+        }
+
+        mostrarHomeOrdens();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        aplicarModoDaTela();
+
+        const campoBusca = document.getElementById('campoBuscaCliente');
+
+        if (campoBusca) {
+            campoBusca.addEventListener('keyup', function () {
+                carregarClientes(campoBusca.value);
+            });
+        }
+    });
+
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             fecharModalAlterarSenha();
             fecharModalRelatorios();
+            fecharModalBuscaCliente();
         }
     });
 
@@ -559,7 +1075,32 @@
                 fecharModalRelatorios();
             }
         }
+
+        const modalBuscaCliente = document.getElementById('modalBuscaCliente');
+        const cardBuscaCliente = document.querySelector('#modalBuscaCliente .modal-senha-card');
+
+        if (modalBuscaCliente && cardBuscaCliente && modalBuscaCliente.classList.contains('ativo')) {
+            const clicouForaDoCardCliente =
+                modalBuscaCliente.contains(event.target) && !cardBuscaCliente.contains(event.target);
+
+            if (clicouForaDoCardCliente) {
+                fecharModalBuscaCliente();
+            }
+        }
     });
+
+    setTimeout(() => {
+        const mensagemErro = document.getElementById('mensagemErro');
+
+        if (mensagemErro) {
+            mensagemErro.style.transition = 'opacity 0.5s ease';
+            mensagemErro.style.opacity = '0';
+
+            setTimeout(() => {
+                mensagemErro.remove();
+            }, 500);
+        }
+    }, 3000);
 </script>
 
 <script th:src="@{/js/sistema.js}"></script>

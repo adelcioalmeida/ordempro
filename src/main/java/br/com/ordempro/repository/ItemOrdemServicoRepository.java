@@ -15,5 +15,7 @@ public interface ItemOrdemServicoRepository extends JpaRepository<ItemOrdemServi
     @EntityGraph(attributePaths = {"servico", "ordemServico"})
     List<ItemOrdemServico> findByOrdemServico_IdOs(Long idOs);
 
+    boolean existsByServico_IdServico(Long idServico);
+
     void deleteByOrdemServico_IdOs(Long idOs);
 }

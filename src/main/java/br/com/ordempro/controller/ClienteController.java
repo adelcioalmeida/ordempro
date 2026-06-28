@@ -87,7 +87,11 @@ public class ClienteController {
     ) {
         try {
             clienteService.salvar(cliente);
-            redirectAttributes.addFlashAttribute("sucesso", "Cliente salvo com sucesso.");
+
+            redirectAttributes.addFlashAttribute(
+                    "sucesso",
+                    "Cliente salvo com sucesso."
+            );
 
             if ("ordem".equalsIgnoreCase(origem)) {
                 return "redirect:/clientes?origem=ordem";
@@ -102,12 +106,26 @@ public class ClienteController {
             model.addAttribute("origem", origem);
 
             return "cliente-form";
+
+        } catch (Exception e) {
+            model.addAttribute(
+                    "erro",
+                    "Não foi possível salvar o cliente. Verifique os dados informados."
+            );
+
+            model.addAttribute("cliente", cliente);
+            model.addAttribute("cidades", cidadeService.listarTodas());
+            model.addAttribute("origem", origem);
+
+            return "cliente-form";
         }
     }
 
     @PostMapping("/clientes/salvar-rapido")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> salvarClienteRapido(@ModelAttribute Cliente cliente) {
+    public ResponseEntity<Map<String, Object>> salvarClienteRapido(
+            @ModelAttribute Cliente cliente
+    ) {
         try {
             if (cliente.getNome() == null || cliente.getNome().isBlank()) {
                 return ResponseEntity.badRequest()
@@ -119,7 +137,9 @@ public class ClienteController {
                         .body(criarRespostaErro("Selecione uma cidade para o cliente."));
             }
 
-            Cidade cidadeSelecionada = cidadeService.buscarPorId(cliente.getCidade().getIdCidade());
+            Cidade cidadeSelecionada = cidadeService.buscarPorId(
+                    cliente.getCidade().getIdCidade()
+            );
 
             if (cidadeSelecionada == null) {
                 return ResponseEntity.badRequest()
@@ -131,6 +151,7 @@ public class ClienteController {
             Cliente clienteSalvo = clienteService.salvar(cliente);
 
             Map<String, Object> resposta = new LinkedHashMap<>();
+
             resposta.put("sucesso", true);
             resposta.put("mensagem", "Cliente cadastrado com sucesso.");
             resposta.put("idCliente", clienteSalvo.getIdCliente());
@@ -144,9 +165,15 @@ public class ClienteController {
 
             return ResponseEntity.ok(resposta);
 
-        } catch (Exception exception) {
-            return ResponseEntity.internalServerError()
-                    .body(criarRespostaErro("Erro ao salvar cliente: " + exception.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(criarRespostaErro(e.getMessage()));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(criarRespostaErro(
+                            "Não foi possível salvar o cliente. Verifique os dados informados."
+                    ));
         }
     }
 
@@ -157,9 +184,20 @@ public class ClienteController {
     ) {
         try {
             clienteService.excluirPorId(id);
-            redirectAttributes.addFlashAttribute("sucesso", "Cliente inativado com sucesso.");
+
+            redirectAttributes.addFlashAttribute(
+                    "sucesso",
+                    "Cliente inativado com sucesso."
+            );
+
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("erro", e.getMessage());
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "erro",
+                    "Não foi possível inativar este cliente."
+            );
         }
 
         return "redirect:/clientes";
@@ -167,6 +205,7 @@ public class ClienteController {
 
     private Map<String, Object> criarRespostaErro(String mensagem) {
         Map<String, Object> resposta = new LinkedHashMap<>();
+
         resposta.put("sucesso", false);
         resposta.put("mensagem", mensagem);
 

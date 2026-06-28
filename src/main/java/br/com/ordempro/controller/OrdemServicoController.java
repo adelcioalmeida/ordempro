@@ -26,10 +26,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class OrdemServicoController {
@@ -89,6 +94,68 @@ public class OrdemServicoController {
         model.addAttribute("modoEdicao", false);
 
         return carregarFormulario(model);
+    }
+
+    @GetMapping("/ordens/clientes/buscar")
+    @ResponseBody
+    public List<Map<String, Object>> buscarClientesParaFiltro(
+            @RequestParam(required = false) String filtro
+    ) {
+        return clienteService.buscarComFiltro(filtro)
+                .stream()
+                .map(this::converterClienteParaMapa)
+                .toList();
+    }
+
+    @GetMapping("/ordens/relatorio")
+    public Object gerarRelatorioOrdens(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long idServico,
+            @RequestParam(required = false) LocalDate dataInicial,
+            @RequestParam(required = false) LocalDate dataFinal,
+            @RequestParam(required = false) String cliente,
+            RedirectAttributes redirectAttributes
+    ) throws Exception {
+        boolean possuiFiltro = possuiTexto(status)
+                || idServico != null
+                || dataInicial != null
+                || dataFinal != null
+                || possuiTexto(cliente);
+
+        if (!possuiFiltro) {
+            redirectAttributes.addFlashAttribute(
+                    "erro",
+                    "Selecione pelo menos um filtro para gerar o relatório."
+            );
+
+            return "redirect:/ordens";
+        }
+
+        List<OrdemServico> ordens = ordemServicoService.buscarComFiltros(
+                status,
+                idServico,
+                dataInicial,
+                dataFinal,
+                cliente
+        );
+
+        if (ordens.isEmpty()) {
+            redirectAttributes.addFlashAttribute(
+                    "erro",
+                    "Nenhuma ordem foi encontrada para os filtros informados."
+            );
+
+            return "redirect:/ordens";
+        }
+
+        byte[] pdf = pdfService.gerarRelatorioOrdens(ordens);
+        ByteArrayResource recursoPdf = new ByteArrayResource(pdf);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio-ordens-servico.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(recursoPdf);
     }
 
     @GetMapping("/ordens/editar/{id}")
@@ -215,13 +282,9 @@ public class OrdemServicoController {
             ordemServico.setStatus(form.getStatus());
         }
 
-        LocalDateTime dataAbertura;
-
-        if (form.getDataAbertura() != null) {
-            dataAbertura = form.getDataAbertura().atTime(LocalDateTime.now().toLocalTime());
-        } else {
-            dataAbertura = LocalDateTime.now();
-        }
+        LocalDateTime dataAbertura = form.getDataAbertura() != null
+                ? form.getDataAbertura().atTime(LocalDateTime.now().toLocalTime())
+                : LocalDateTime.now();
 
         ordemServico.setDataAbertura(dataAbertura);
 
@@ -243,11 +306,12 @@ public class OrdemServicoController {
         item.setValor(valor);
         itemOrdemServicoService.salvar(item);
 
-        if (form.getIdOs() == null) {
-            redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço cadastrada com sucesso.");
-        } else {
-            redirectAttributes.addFlashAttribute("sucesso", "Ordem de serviço atualizada com sucesso.");
-        }
+        redirectAttributes.addFlashAttribute(
+                "sucesso",
+                form.getIdOs() == null
+                        ? "Ordem de serviço cadastrada com sucesso."
+                        : "Ordem de serviço atualizada com sucesso."
+        );
 
         return "redirect:/ordens";
     }
@@ -283,47 +347,59 @@ public class OrdemServicoController {
 
     @GetMapping("/ordens")
     public String listarOrdens(
-            @RequestParam(required = false) String termoBusca,
-            @RequestParam(required = false) java.util.List<String> filtros,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long idServico,
+            @RequestParam(required = false) LocalDate dataInicial,
+            @RequestParam(required = false) LocalDate dataFinal,
+            @RequestParam(required = false) String cliente,
+
+            @RequestParam(required = false) String usarStatus,
+            @RequestParam(required = false) String usarServico,
+            @RequestParam(required = false) String usarPeriodo,
+            @RequestParam(required = false) String usarCliente,
+
             Model model
     ) {
-        String status = null;
-        String cliente = null;
-        String servico = null;
+        boolean filtroStatus = usarStatus != null;
+        boolean filtroServico = usarServico != null;
+        boolean filtroPeriodo = usarPeriodo != null;
+        boolean filtroCliente = usarCliente != null;
 
-        if (filtros != null && termoBusca != null && !termoBusca.isBlank()) {
-            if (filtros.contains("status")) {
-                status = termoBusca;
-            }
+        boolean possuiFiltro =
+                (filtroStatus && possuiTexto(status))
+                        || (filtroServico && idServico != null)
+                        || (filtroPeriodo && (dataInicial != null || dataFinal != null))
+                        || (filtroCliente && possuiTexto(cliente));
 
-            if (filtros.contains("cliente")) {
-                cliente = termoBusca;
-            }
-
-            if (filtros.contains("servico")) {
-                servico = termoBusca;
-            }
-        }
-
-        boolean semFiltros =
-                (filtros == null || filtros.isEmpty())
-                        || termoBusca == null
-                        || termoBusca.isBlank();
-
-        java.util.List<OrdemServico> ordens;
-
-        if (semFiltros) {
-            ordens = ordemServicoService.listarUltimas5();
-        } else {
-            ordens = ordemServicoService.buscarComFiltros(status, cliente, servico);
-        }
+        List<OrdemServico> ordens = possuiFiltro
+                ? ordemServicoService.buscarComFiltros(
+                filtroStatus ? status : null,
+                filtroServico ? idServico : null,
+                filtroPeriodo ? dataInicial : null,
+                filtroPeriodo ? dataFinal : null,
+                filtroCliente ? cliente : null
+        )
+                : ordemServicoService.listarUltimas5();
 
         model.addAttribute("ordens", ordens);
+
         model.addAttribute("totalOrdens", ordemServicoService.listarTodas().size());
         model.addAttribute("totalClientes", clienteService.listarTodos().size());
-        model.addAttribute("ordensAbertas", ordemServicoService.buscarComFiltros("ABERTA", null, null).size());
-        model.addAttribute("termoBusca", termoBusca);
-        model.addAttribute("filtrosSelecionados", filtros);
+        model.addAttribute("ordensAbertas", ordemServicoService.contarOrdensAbertas());
+
+        model.addAttribute("servicos", servicoService.listarTodos());
+
+        model.addAttribute("statusSelecionado", status);
+        model.addAttribute("servicoSelecionado", idServico);
+        model.addAttribute("dataInicial", dataInicial);
+        model.addAttribute("dataFinal", dataFinal);
+        model.addAttribute("cliente", cliente);
+
+        model.addAttribute("usarStatus", filtroStatus);
+        model.addAttribute("usarServico", filtroServico);
+        model.addAttribute("usarPeriodo", filtroPeriodo);
+        model.addAttribute("usarCliente", filtroCliente);
+
         model.addAttribute("ordemService", ordemServicoService);
 
         return "ordens-lista";
@@ -373,6 +449,26 @@ public class OrdemServicoController {
 
         redirectAttributes.addFlashAttribute("sucesso", "E-mail enviado com sucesso.");
         return "redirect:/ordens";
+    }
+
+    private Map<String, Object> converterClienteParaMapa(Cliente cliente) {
+        Map<String, Object> dados = new HashMap<>();
+
+        dados.put("idCliente", cliente.getIdCliente());
+        dados.put("nome", valorTexto(cliente.getNome()));
+        dados.put("cpf", valorTexto(cliente.getCpf()));
+        dados.put("telefone", valorTexto(cliente.getTelefone()));
+        dados.put("celular", valorTexto(cliente.getCelular()));
+
+        if (cliente.getCidade() != null) {
+            dados.put("cidade", valorTexto(cliente.getCidade().getNome()));
+            dados.put("uf", valorTexto(cliente.getCidade().getUf()));
+        } else {
+            dados.put("cidade", "NÃO INFORMADA");
+            dados.put("uf", "");
+        }
+
+        return dados;
     }
 
     private boolean camposObrigatoriosInvalidos(OrdemServicoFormDTO form) {
@@ -454,6 +550,18 @@ public class OrdemServicoController {
         return authentication.getAuthorities()
                 .stream()
                 .anyMatch(authority -> perfil.equals(authority.getAuthority()));
+    }
+
+    private boolean possuiTexto(String valor) {
+        return valor != null && !valor.isBlank();
+    }
+
+    private String valorTexto(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return "NÃO INFORMADO";
+        }
+
+        return valor;
     }
 
     private void adicionarNomeClienteSelecionado(Model model, Long idCliente) {
